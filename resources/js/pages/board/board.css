@@ -1,0 +1,93 @@
+.btn {
+	margin: 0 0.25em;
+}
+
+.square {
+	--count: "0";
+	font-size: 1.5em;
+	border: 1px solid black;
+	width: 1.7em;
+	height: 1.7em;
+	vertical-align: middle;
+	text-align: center;
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	cursor: pointer;
+	position: relative;
+}
+.square.hint.root_highlight::after {
+	content: var(--count);
+	position: absolute;
+	/* top: -1em; */
+	font-size: 0.6em;
+	top: -0.6em;
+	right: -0.6em;
+	background-color: chartreuse;
+	border-radius: 1em;
+	z-index: 1;
+	aspect-ratio: 1;
+	height: 1.5em;
+	border: 2px solid green;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.square:hover {
+	box-shadow: 0 0 0px 2px green;
+}
+.square.wall {
+	background-color: black;
+}
+.square.wall_highlighted-left {
+	border-left: 2px solid deepskyblue;
+}
+.square.wall_highlighted-top {
+	border-top: 2px solid deepskyblue;
+}
+.square.wall_highlighted-right {
+	border-right: 2px solid deepskyblue;
+}
+.square.wall_highlighted-bottom {
+	border-bottom: 2px solid deepskyblue;
+}
+.square.wall_highlighted {
+	border: 2px solid deepskyblue;
+}
+.square.island_highlighted {
+	background-color: rgba(108, 236, 108, 0.917);
+}
+
+#gameboard {
+	margin: 0 auto;
+	position: relative;
+}
+
+#det_api {
+	border: 3px solid rgb(63, 146, 242);
+	border-radius: 0.5em;
+}
+#det_api table td {
+	border-top: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
+	padding: 0.25em;
+}
+#det_api > summary, #det_api > div {
+	padding: 0.25em;
+}
+#det_api > summary:hover {
+	background-color: rgba(0, 0, 180, 0.05);
+}
+
+.wrap_board {
+	position: relative;
+}
+
+#fullboardchange {
+	margin: auto;
+}
+
+#gameboard.won {
+	opacity: 0.5;
+	pointer-events: none;
+}/*# sourceMappingURL=board.css.map */
