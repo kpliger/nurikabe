@@ -33,19 +33,16 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: php-app
-          path: release.zip
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -55,16 +52,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4EB05620D1FA482782163D6B76CFDAD4 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DCC2D15309F1406D8B73D372855A26D0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_926BB60B4BF246B19FC356330A123FC9 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_75E7814C7517484C8425D1487041AD05 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3E4E7DB47FAF427BAD3E0C2CF25BCEAE }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_07704910902A43FCB1112EE00C097D82 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
