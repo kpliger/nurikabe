@@ -30,7 +30,7 @@
         "@vitejs/plugin-vue": "^5.2.1",
         "@vue/compat": "^3.5.13",
         "@vueuse/core": "^12.8.2",
-        "bootstrap": "^4.6.2",
+        "bootstrap": "^5.3.7",
         "bootstrap-vue": "^2.23.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

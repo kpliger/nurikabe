@@ -666,7 +666,7 @@ function unfocusPage(){
 
 <template >
 
-	<Head title="Leaderboard" />
+	<Head title="Board" />
 
 	<AppLayout :breadcrumbs="breadcrumbs" @blur='unfocusPage()' @focus='focusPage()'>
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
@@ -686,6 +686,23 @@ function unfocusPage(){
 						echo "<option>$value</option>";
 					}?> -->
 				</select>
+				<details id='det_help'>
+					<summary>Help</summary>
+					<div class='det-content'>
+						<ul>
+							<li>Wall cells are full filled cell</li>
+							<li>Hint cells are cell with a number.</li>
+							<li>Island cells are cell with a dot.</li>
+							<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
+							<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
+							<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
+							<li>Ctrl+Z = Undo</li>
+							<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
+							<li>The first few walls are filled in.</li>
+
+						</ul>
+					</div>
+				</details>
 				<details id='det_api' open>
 					<summary>API</summary>
 					<div class='det-content'>

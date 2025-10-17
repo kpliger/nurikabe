@@ -1,11 +1,17 @@
 .btn {
 	margin: 0 0.25em;
 }
+details ul{
+	padding-left:1em;
+	li::marker{
+		content:"●  ";
+	}
+}
 
 .square {
 	--count: "0";
 	font-size: 1.5em;
-	border: 1px solid black;
+	border: 1px solid;
 	width: 1.7em;
 	height: 1.7em;
 	vertical-align: middle;
@@ -32,12 +38,20 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: rgba(0, 114, 0, 0.917);
+	}
 }
 .square:hover {
 	box-shadow: 0 0 0px 2px green;
 }
 .square.wall {
 	background-color: black;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: white;
+	}
 }
 .square.wall_highlighted-left {
 	border-left: 2px solid deepskyblue;
@@ -56,6 +70,10 @@
 }
 .square.island_highlighted {
 	background-color: rgba(108, 236, 108, 0.917);
+
+	@media (prefers-color-scheme: dark) {
+		background-color: rgba(0, 114, 0, 0.917);
+	}
 }
 
 #gameboard {
@@ -63,16 +81,19 @@
 	position: relative;
 }
 
-#det_api {
+#det_api ,
+#det_help {
 	border: 3px solid rgb(63, 146, 242);
 	border-radius: 0.5em;
 }
+
 #det_api table td {
 	border-top: 1px solid lightgray;
 	border-bottom: 1px solid lightgray;
 	padding: 0.25em;
 }
-#det_api > summary, #det_api > div {
+#det_api > summary, #det_api > div ,
+#det_help > summary, #det_help > div {
 	padding: 0.25em;
 }
 #det_api > summary:hover {
@@ -91,3 +112,11 @@
 	opacity: 0.5;
 	pointer-events: none;
 }/*# sourceMappingURL=board.css.map */
+
+@media (prefers-color-scheme: dark) {
+	/* CSS rules for dark mode */
+	#api_difficulty{
+		color:white;
+		background-color: black;
+	}
+}

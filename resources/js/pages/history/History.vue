@@ -44,11 +44,11 @@ function formatGameTime(time){
 </style>
 
 <template>
-	<Head title="Tictactoe" />
+	<Head title="History" />
 
 	<AppLayout :breadcrumbs="breadcrumbs">
 		<div id='tictactoe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-
+			Record of games that the user completed.
 
 			<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
 				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

@@ -15,6 +15,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Board',
+        href: '/board',
+        icon: LayoutGrid,
+    },
+    {
         title: 'Leaderboard',
         href: '/leaderboard',
         icon: LayoutGrid,
@@ -25,11 +30,6 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Board',
-        href: '/board',
-        icon: LayoutGrid,
-    },
-    {
         title: 'History',
         href: '/history',
         icon: LayoutGrid,
@@ -37,6 +37,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Tictactoe',
         href: '/tictactoe',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Explanation',
+        href: '/explanation',
         icon: LayoutGrid,
     },
 ];
