@@ -55,7 +55,7 @@ jobs:
         with:
           name: php-app
 
-      - name: Unzip the artifact
+      - name: Unzip artifact for deployment
         run: unzip release.zip
 
       - name: Login to Azure
