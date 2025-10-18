@@ -33,6 +33,8 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
+      - name: Zip the application files
+        run: zip -r release.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -52,7 +54,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-app
-      
+
+      - name: Unzip the artifact
+        run: unzip release.zip
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -67,4 +72,3 @@ jobs:
           app-name: 'nurikabe'
           slot-name: 'Production'
           package: .
-          
