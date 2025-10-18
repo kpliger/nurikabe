@@ -43,7 +43,7 @@ jobs:
         run: npm ci # Use 'npm ci' for clean installs in CI environments
 
       - name: Run build
-        run: npm run build --verbose
+        run: npm run build
 
       - name: Zip the application files
         run: zip -r release.zip ./*

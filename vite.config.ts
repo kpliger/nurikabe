@@ -4,7 +4,7 @@ import path from 'path';
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import vueDevTools from 'vite-plugin-vue-devtools'
+// import vueDevTools from 'vite-plugin-vue-devtools'
 
 
 export default defineConfig({
@@ -23,7 +23,7 @@ export default defineConfig({
                 },
             },
         }),
-        vueDevTools(),
+        // vueDevTools(),
     ],
     resolve: {
         alias: {
