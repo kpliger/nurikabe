@@ -1,95 +1,128 @@
+#nurikabe{
+	--sqr_size:40px;
+	--col_count: 6;
+}
 .btn {
-    margin: 0 .25em;
+	margin: 0 .25em;
+}
+
+details ul{
+	padding-left:1em;
+	li::marker{
+		content:"●  ";
+	}
 }
 .square {
-    --count: '0';
-    font-size: 1.5em;
-    border: 1px solid black;
-    width: 1.7em;
-    height: 1.7em;
-    vertical-align: middle;
-    text-align: center;
-    user-select: none;
-    cursor: pointer;
-    position: relative;
+	--count: '0';
+	font-size: 1.5em;
+	border: 1px solid;
+	height: var(--sqr_size);
+	width: var(--sqr_size);
+	vertical-align: middle;
+	text-align: center;
+	user-select: none;
+	cursor: pointer;
+	position: relative;
 
-    &.hint.root_highlight::after {
-        content: var(--count);
-        position: absolute;
-        /* top: -1em; */
-        font-size: .6em;
-        top: -.6em;
-        right: -.6em;
-        background-color:chartreuse;
-        border-radius: 1em;
-        z-index: 1;
-        aspect-ratio: 1;
-        height: 1.5em;
-        border: 2px solid green;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    &:hover {
-        box-shadow: 0 0 0px 2px green;
-    }
-    &.wall {
-        background-color: black;
-    }
-    &.wall_highlighted-left {
-        border-left: 2px solid deepskyblue;
-    }
-    &.wall_highlighted-top {
-        border-top: 2px solid deepskyblue;
-    }
-    &.wall_highlighted-right {
-        border-right: 2px solid deepskyblue;
-    }
-    &.wall_highlighted-bottom {
-        border-bottom: 2px solid deepskyblue;
-    }
-    &.wall_highlighted {
-        border: 2px solid deepskyblue;
-    }
-    &.island_highlighted {
-        background-color: rgba(108, 236, 108, 0.917)
-    }
+	&.hint.root_highlight::after {
+		content: var(--count);
+		position: absolute;
+		/* top: -1em; */
+		font-size: .6em;
+		top: -.6em;
+		right: -.6em;
+		background-color:chartreuse;
+		border-radius: 1em;
+		z-index: 1;
+		aspect-ratio: 1;
+		height: 1.5em;
+		border: 2px solid green;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		// color:black;
+		@media (prefers-color-scheme: dark) {
+			background-color: rgba(0, 114, 0, 0.917);
+		}
+	}
+	&:hover {
+		box-shadow: 0 0 0px 2px green;
+	}
+	&.wall {
+		background-color: black;
+
+		@media (prefers-color-scheme: dark) {
+			background-color: white;
+		}
+	}
+	&.wall_highlighted-left {
+		border-left: 2px solid deepskyblue;
+	}
+	&.wall_highlighted-top {
+		border-top: 2px solid deepskyblue;
+	}
+	&.wall_highlighted-right {
+		border-right: 2px solid deepskyblue;
+	}
+	&.wall_highlighted-bottom {
+		border-bottom: 2px solid deepskyblue;
+	}
+	&.wall_highlighted {
+		border: 2px solid deepskyblue;
+	}
+	&.island_highlighted {
+		background-color: rgba(108, 236, 108, 0.917);
+
+		@media (prefers-color-scheme: dark) {
+			background-color: rgba(0, 114, 0, 0.917);
+		}
+	}
 }
 #gameboard {
-    // border: none;
-    // display: inline-block;
-    margin: 0 auto;
-    position: relative;
+	// border: none;
+	// display: inline-block;
+	margin: 0 auto;
+	position: relative;
+	// width:100%;
+	width:calc(var(--sqr_size)*var(--col_count));
 }
 
-#det_api{
-    border:3px solid rgb(63, 146, 242);
-    border-radius: .5em;
+#det_api,
+#det_help {
+	border:3px solid rgb(63, 146, 242);
+	border-radius: .5em;
 
-    table{
-        td{
-            border-top: 1px solid lightgray;
-            border-bottom: 1px solid lightgray;
-            padding: 0.25em;
-        }
-    }
-    &>summary,
-    &>div{
-        padding:.25em;
-    }
+	table{
+		td{
+			border-top: 1px solidd lightgray;
+			border-bottom: 1px solid lightgray;
+			padding: 0.25em;
+		}
+	}
+	&>summary,
+	&>div{
+		padding:.25em;
+	}
 
-    &>summary:hover{
-        background-color: rgba(0,0,180, .05);
+	&>summary:hover{
+		background-color: rgba(0,0,180, .05);
 
-    }
+	}
 }
 .wrap_board{
-    position: relative;
+	position: relative;
 }
 #fullboardchange{
-    margin: auto;
+	margin: auto;
 }
 #gameboard.won{
-    opacity: .5;
-    pointer-events: none;
+	opacity: .5;
+	pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+	/* CSS rules for dark mode */
+	#api_difficulty{
+		color:white;
+		background-color: black;
+	}
 }

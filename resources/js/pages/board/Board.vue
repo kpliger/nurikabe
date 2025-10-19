@@ -494,6 +494,7 @@ async function findPuzzleByDate(){
 		const g = data.data.startingGrid;
 
 		ogboard =[[]]
+		$('#nurikabe').css('--col_count', w);
 		Object.entries(g).forEach(([k,v]) => {
 			const x = parseInt(k/w);
 			const y = k%w;
@@ -662,6 +663,7 @@ function unfocusPage(){
 <style lang='css' scoped>
 @import url('bootstrap/dist/css/bootstrap.css');
 @import url('./board.css');
+
 </style>
 
 <template >
