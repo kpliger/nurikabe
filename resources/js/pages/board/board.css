@@ -115,6 +115,7 @@ details ul li::marker {
 
 .wrap_board {
   position: relative;
+  overflow: scroll;
 }
 
 #fullboardchange {

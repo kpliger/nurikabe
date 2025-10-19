@@ -1,6 +1,3 @@
-#tictactoe {
-  @import url("bootstrap-vue/dist/bootstrap-vue.css");
-}
 #tictactoe #wrap_board {
   display: inline-block;
   border: 1px solid;
