@@ -494,7 +494,16 @@ async function findPuzzleByDate(){
 		const g = data.data.startingGrid;
 
 		ogboard =[[]]
-		$('#nurikabe').css('--col_count', w);
+		const boardSizeOg = 300;
+
+		let boardWidth = $('.wrap_board').css('width'); // get board width
+		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
+		boardWidth = Math.min(boardWidth, boardSizeOg);
+		let cellSize = (boardWidth/w)/1.9;
+		console.log(cellSize)
+
+		$('#nurikabe').css('--sqr_size', cellSize+'px');
+
 		Object.entries(g).forEach(([k,v]) => {
 			const x = parseInt(k/w);
 			const y = k%w;
@@ -736,6 +745,11 @@ function unfocusPage(){
 				</details>
 
 			</div>
+			<div id='fullboardchange' style='margin:auto;'>
+				<button class='btn btn-success' @click='reset()'>reset</button>
+				<button class='btn btn-success' @click='saveBoard()'>save board</button>
+				<button class='btn btn-success' @click='loadBoard()'>load board</button>
+			</div>
 			<div style="margin-bottom: .25em;">
 				<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
 					<div style='font-family: monospace; font-size: 1.5em;'>{{gameTimer}}</div>
@@ -758,11 +772,6 @@ function unfocusPage(){
 						</td>
 					</tr>
 				</table>
-			</div>
-			<div id='fullboardchange' style='margin:auto;'>
-				<button class='btn btn-success' @click='reset()'>reset</button>
-				<button class='btn btn-success' @click='saveBoard()'>save board</button>
-				<button class='btn btn-success' @click='loadBoard()'>load board</button>
 			</div>
 		</div>
 	</AppLayout>

@@ -1,7 +1,6 @@
 @charset "UTF-8";
 #nurikabe {
-  --sqr_size:40px;
-  --col_count: 6;
+  --sqr_size:31px;
 }
 
 .btn {
@@ -17,10 +16,10 @@ details ul li::marker {
 
 .square {
   --count: "0";
-  font-size: 1.5em;
+  font-size: var(--sqr_size);
   border: 1px solid;
-  height: var(--sqr_size);
-  width: var(--sqr_size);
+  height: 1.7em;
+  width: 1.7em;
   vertical-align: middle;
   text-align: center;
   -webkit-user-select: none;
@@ -86,10 +85,10 @@ details ul li::marker {
   }
 }
 
-#gameboard {
-  margin: 0 auto;
+table#gameboard {
+  border: 3px solid;
+  margin: 0.5em auto;
   position: relative;
-  width: calc(var(--sqr_size) * var(--col_count));
 }
 
 #det_api,
@@ -99,7 +98,7 @@ details ul li::marker {
 }
 #det_api table td,
 #det_help table td {
-  border-top: 1px solidd lightgray;
+  border-top: 1px solid lightgray;
   border-bottom: 1px solid lightgray;
   padding: 0.25em;
 }
@@ -116,6 +115,7 @@ details ul li::marker {
 .wrap_board {
   position: relative;
   overflow: scroll;
+  height: calc(100vh - 170px);
 }
 
 #fullboardchange {
