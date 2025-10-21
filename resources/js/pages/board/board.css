@@ -114,8 +114,6 @@ table#gameboard {
 
 .wrap_board {
   position: relative;
-  overflow: scroll;
-  height: calc(100vh - 170px);
 }
 
 #fullboardchange {
@@ -131,6 +129,23 @@ table#gameboard {
   /* CSS rules for dark mode */
   #api_difficulty {
     color: white;
+    background-color: black;
+  }
+}
+#blanket {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (prefers-color-scheme: dark) {
+  #blanket {
     background-color: black;
   }
 }/*# sourceMappingURL=board.css.map */

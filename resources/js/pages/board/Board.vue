@@ -13,6 +13,9 @@ script.integrity = 'sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=';
 script.crossOrigin = 'anonymous'; // JS property, not HTML attribute
 document.head.appendChild(script);
 
+
+// import BlanketLoader from  "@/lib/BlanketLoader"
+
 /**
  * Note
  * - auto validate when total hint == flagged
@@ -88,12 +91,15 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
-
+// let blanket:any = null;
 
 
 onMounted(()=>{
 	date.value = (new Date()).toISOString().split('T')[0]
 	difficulty.value = 'small'
+
+	// blanket = new BlanketLoader();
+	// blanket.initialize();
 })
 
 watch(board, (newBoard)=>{
@@ -478,9 +484,11 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function findPuzzleByDate(){
-	const slashDate:any = date.value.replaceAll("-","/")
+	const slashDate = date.value.replaceAll("-","/")
 
 	try {
+		// blanket.show();
+
 		const v = await axios.post(
 			"/fetchapi",
 			{
@@ -488,19 +496,20 @@ async function findPuzzleByDate(){
 				date: slashDate,
 			}
 		)
+		// blanket.hide();
+
 		const data = v.data.puzzleData;
 		// const h = data.gridHeight;
 		const w = data.gridWidth;
 		const g = data.data.startingGrid;
 
 		ogboard =[[]]
-		const boardSizeOg = 300;
 
 		let boardWidth = $('.wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
-		boardWidth = Math.min(boardWidth, boardSizeOg);
+
 		let cellSize = (boardWidth/w)/1.9;
-		console.log(cellSize)
+		cellSize = Math.min(cellSize, 30);
 
 		$('#nurikabe').css('--sqr_size', cellSize+'px');
 
@@ -773,6 +782,7 @@ function unfocusPage(){
 					</tr>
 				</table>
 			</div>
+			<!-- <div id="blanket">Loading...</div> -->
 		</div>
 	</AppLayout>
 </template>
