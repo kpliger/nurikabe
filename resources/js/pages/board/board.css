@@ -148,4 +148,16 @@ table#gameboard {
   #blanket {
     background-color: black;
   }
+}
+
+#tbl_moves {
+  border: 3px solid;
+}
+#tbl_moves th {
+  padding: 0.25em;
+}
+#tbl_moves td {
+  border: 1px solid;
+  padding: 0.25em;
+  text-align: center;
 }/*# sourceMappingURL=board.css.map */

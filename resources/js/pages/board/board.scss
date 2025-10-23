@@ -113,6 +113,8 @@ table#gameboard {
 	position: relative;
 	// overflow: scroll;
 	// height: calc(100vh - 170px);
+	// width: calc(100% - 150px);
+	// display: inline-block;
 }
 #fullboardchange{
 	margin: auto;
@@ -142,5 +144,16 @@ table#gameboard {
 
 	@media (prefers-color-scheme: dark) {
 		background-color: black;
+	}
+}
+#tbl_moves{
+	border:3px solid;
+	th{
+		padding:.25em;
+	}
+	td{
+		border: 1px solid;
+		padding:.25em;
+		text-align: center;
 	}
 }

@@ -4,7 +4,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { SharedData, type BreadcrumbItem, type User } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
-import {onMounted, ref, watch, toRaw} from 'vue';
+import {onMounted, ref, watch, toRaw, useTemplateRef} from 'vue';
+
+import {useLoading} from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css';
 
 const script = document.createElement('script');
 script.type = 'module';
@@ -13,8 +16,6 @@ script.integrity = 'sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=';
 script.crossOrigin = 'anonymous'; // JS property, not HTML attribute
 document.head.appendChild(script);
 
-
-// import BlanketLoader from  "@/lib/BlanketLoader"
 
 /**
  * Note
@@ -30,6 +31,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 		href: '/board',
 	},
 ];
+const loadingContainer = useTemplateRef('loadingContainer');
+
+const $loading = useLoading({});
 
 // const props = defineProps({
 // 	user:Object,
@@ -68,8 +72,8 @@ let ogboard:string[][] = [
 	["  ","  ","  ","  ","  "," 3"],
 	["  ","  ","  ","  ","  ","  "],
 ];
-let move:number[][] = [];
-let move_r:number[][] = [];
+const move:any = ref([]);// :number[][] = [];
+const move_r:any = ref([]);// :number[][] = [];
 
 const difficulty = ref('');
 const date = ref();
@@ -91,15 +95,11 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
-// let blanket:any = null;
 
 
 onMounted(()=>{
 	date.value = (new Date()).toISOString().split('T')[0]
 	difficulty.value = 'small'
-
-	// blanket = new BlanketLoader();
-	// blanket.initialize();
 })
 
 watch(board, (newBoard)=>{
@@ -190,11 +190,12 @@ async function setSquare(x:number, y:number, state=''){
 		if(value== '  ') board.value[x][y] = ' ■';
 		else if(value== ' ■')  board.value[x][y] = ' ●';
 		else if(value== ' ●')  board.value[x][y] = '  ';
-		if(state == ''){
-			move.push([x,y]);
-			move_r= [];
-		}
 	}
+	if(state == ''){
+		move.value.push([x,y]);
+		move_r.value= [];
+	}
+	// console.log(move.value);
 
 	boardClass.value[x][y]['wall'] = board.value[x][y] == ' ■'
 	setTimeout(validateBoard, 10);
@@ -370,6 +371,7 @@ function reset(){
 		});
 	});
 	board.value = [...ogboard];
+	move.value = [];
 
 	timerval1.value=0;
 	timerRunning = false;
@@ -487,7 +489,7 @@ async function findPuzzleByDate(){
 	const slashDate = date.value.replaceAll("-","/")
 
 	try {
-		// blanket.show();
+		const loader = $loading.show();
 
 		const v = await axios.post(
 			"/fetchapi",
@@ -496,7 +498,9 @@ async function findPuzzleByDate(){
 				date: slashDate,
 			}
 		)
-		// blanket.hide();
+		loader.hide();
+
+		move.value = [];
 
 		const data = v.data.puzzleData;
 		// const h = data.gridHeight;
@@ -538,16 +542,16 @@ async function findPuzzleByDate(){
 
 function redo(){
 	// console.log('redo')
-	const cell:number[] = move_r.pop()??[];
+	const cell:number[] = move_r.value.pop()??[];
 	if(cell.length==0) return;
-	move.push(cell);
+	move.value.push(cell);
 	setSquare(cell[0], cell[1], 'up');
 }
 function undo(){
 	// console.log('undo')
-	const cell:number[] = move.pop()??[];
+	const cell:number[] = move.value.pop()??[];
 	if(cell.length==0) return;
-	move_r.push(cell);
+	move_r.value.push(cell);
 	setSquare(cell[0], cell[1], 'down');
 }
 function autofill(){
@@ -693,7 +697,7 @@ function unfocusPage(){
 			tabindex='0'
 			@click.exact='resetHighlighting()' @keyup.ctrl.z.exact='undo()'
 			@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
-
+			ref="loadingContainer"
 		>
 			<br>
 			<div style="margin-bottom:1em;">
@@ -730,11 +734,21 @@ function unfocusPage(){
 							<tr>
 								<td>Difficulty</td>
 								<td>
-									<select v-model="difficulty" name='' id='api_difficulty'>
-										<option>small</option>
-										<option>medium</option>
-										<option>large</option>
-									</select>
+									<div>
+										<label>
+											<input type="radio" name="" value='small' v-model="difficulty">
+											Small
+										</label> |
+										<label>
+											<input type="radio" name="" value='medium'  v-model="difficulty">
+											Medium
+										</label> |
+										<label>
+											<input type="radio" name="" value='large'  v-model="difficulty">
+											Large
+										</label>
+
+									</div>
 								</td>
 							</tr>
 							<tr>
@@ -747,7 +761,6 @@ function unfocusPage(){
 						<hr>
 						<div>
 							<button type='button' class='btn btn-primary' @click='findPuzzleByDate()' >Submit</button>
-
 							<input type='button' value='Random' class='btn btn-primary' @click='randomFetch()' />
 						</div>
 					</div>
@@ -768,21 +781,41 @@ function unfocusPage(){
 					</div>
 				</div>
 			</div>
-			<div class="wrap_board">
-				<table id='gameboard'>
-					<tr v-for='(_,x) in board.length' :key='x' class=''>
-						<td v-for='(_, y) in board[x].length' :key='y' class='square'
-							@click="setSquare(x, y)"
-							@contextmenu="highlightEntity(x,y)"
-							:class='boardClass[x][y]'
-							:id="'item-'+x+'_'+y"
-						>
-							{{ board[x][y] }}
-						</td>
-					</tr>
-				</table>
+			<div>
+
+				<div class="wrap_board">
+					<table id='gameboard'>
+						<tr v-for='(_,x) in board.length' :key='x' class=''>
+							<td v-for='(_, y) in board[x].length' :key='y' class='square'
+								@click="setSquare(x, y)"
+								@contextmenu="highlightEntity(x,y)"
+								:class='boardClass[x][y]'
+								:id="'item-'+x+'_'+y"
+							>
+								{{ board[x][y] }}
+							</td>
+						</tr>
+					</table>
+				</div>
+				<!-- <div style="display: inline-block; width: 150px; vertical-align: top; padding:.5em;">
+					<table id="tbl_moves">
+						<thead>
+							<tr>
+								<th>Move</th>
+								<th style='padding:.25em .75em;'>X</th>
+								<th style='padding:.25em .75em;'>Y</th>
+							</tr>
+						</thead>
+						<tbody style="max-height:300px;">
+							<tr v-for='(_,x) in move' :key='x' class=''>
+								<td>{{move.length -1 - x}}</td>
+								<td>{{move[move.length -1 - x][0]}}</td>
+								<td>{{move[move.length -1 - x][1]}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div> -->
 			</div>
-			<!-- <div id="blanket">Loading...</div> -->
 		</div>
 	</AppLayout>
 </template>
