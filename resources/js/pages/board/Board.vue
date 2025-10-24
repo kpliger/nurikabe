@@ -9,6 +9,9 @@ import {onMounted, ref, watch, toRaw, useTemplateRef} from 'vue';
 import {useLoading} from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/css/index.css';
 
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
+
 const script = document.createElement('script');
 script.type = 'module';
 script.src = 'https://code.jquery.com/jquery-3.6.3.min.js';
@@ -31,9 +34,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 		href: '/board',
 	},
 ];
-const loadingContainer = useTemplateRef('loadingContainer');
-
 const $loading = useLoading({});
+
+
+// const datePicker = ref();
 
 // const props = defineProps({
 // 	user:Object,
@@ -78,10 +82,15 @@ const move_r:any = ref([]);// :number[][] = [];
 const difficulty = ref('');
 const date = ref();
 
+const dateFilter = ref();
+const isOpenFilter = ref(true);
+
 const gameTimer = ref("00:00");
 const timerval1 = ref(0);
 let timerRunning = false;
 let interval1 = null;//setInterval(()=>{timerval1.value++}, 1000);
+
+const isDarkMode = ref(false);
 
 const board = ref([
 	["  ","  ","  ","  ","  ","  "],
@@ -98,7 +107,15 @@ const boardClass:any = ref([]);
 
 
 onMounted(()=>{
-	date.value = (new Date()).toISOString().split('T')[0]
+	date.value = new Date();
+
+	let slashDate = date.value.toISOString();
+	slashDate = slashDate.slice(0,10)
+	slashDate = slashDate.replaceAll("-","/");
+	dateFilter.value = slashDate;
+
+	isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
 	difficulty.value = 'small'
 })
 
@@ -486,7 +503,10 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function findPuzzleByDate(){
-	const slashDate = date.value.replaceAll("-","/")
+	let slashDate = date.value.toISOString();
+	slashDate = slashDate.slice(0,10)
+	slashDate = slashDate.replaceAll("-","/");
+	dateFilter.value = slashDate;
 
 	try {
 		const loader = $loading.show();
@@ -499,6 +519,7 @@ async function findPuzzleByDate(){
 			}
 		)
 		loader.hide();
+		isOpenFilter.value=false;
 
 		move.value = [];
 
@@ -633,13 +654,15 @@ function randomFetch(){
 	day = (Math.floor(Math.random() * 2)+30).toString().padStart(2, '0');
 	the_date = new Date(`${year}/${month}/${day}`);
 
-	year = the_date.getFullYear();
-	month = (the_date.getMonth()+1).toString().padStart(2, '0');
-	day = (the_date.getDay()+1).toString().padStart(2, '0');
-	validDate = `${year}-${month}-${day}`;
+	// year = the_date.getFullYear();
+	// month = (the_date.getMonth()+1).toString().padStart(2, '0');
+	// day = (the_date.getDay()+1).toString().padStart(2, '0');
+	// validDate = new Date(`${year}-${month}-${day}`);
+	// console.log(validDate.toISOString())
+	// validDate = the_date;
 
 	difficulty.value = difficulties[the_difficulty]
-	date.value = validDate
+	date.value = the_date
 
 	findPuzzleByDate()
 }
@@ -727,8 +750,16 @@ function unfocusPage(){
 						</ul>
 					</div>
 				</details>
-				<details id='det_api' open>
-					<summary>API</summary>
+				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
+					<summary>
+						API
+						&nbsp;&nbsp;&nbsp;<div class="pill-filter" id="filter_difficulty" v-if="!isOpenFilter">
+							Difficulty: {{ difficulty }}
+						</div>
+						<div class="pill-filter" id="filter_date" v-if="!isOpenFilter">
+							Date: {{ dateFilter }}
+						</div>
+					</summary>
 					<div class='det-content'>
 						<table>
 							<tr>
@@ -752,9 +783,11 @@ function unfocusPage(){
 								</td>
 							</tr>
 							<tr>
-								<td>Date</td>
+								<td style="vertical-align: top;">Date</td>
 								<td>
-									<input type='date' v-model='date' name='' id='api_date' />
+  									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
+									  :dark="isDarkMode"
+									></VueDatePicker>
 								</td>
 							</tr>
 						</table>
@@ -767,6 +800,7 @@ function unfocusPage(){
 				</details>
 
 			</div>
+
 			<div id='fullboardchange' style='margin:auto;'>
 				<button class='btn btn-success' @click='reset()'>reset</button>
 				<button class='btn btn-success' @click='saveBoard()'>save board</button>
@@ -782,7 +816,6 @@ function unfocusPage(){
 				</div>
 			</div>
 			<div>
-
 				<div class="wrap_board">
 					<table id='gameboard'>
 						<tr v-for='(_,x) in board.length' :key='x' class=''>

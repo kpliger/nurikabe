@@ -29,6 +29,7 @@
         "@tailwindcss/vite": "^4.1.1",
         "@vitejs/plugin-vue": "^5.2.1",
         "@vue/compat": "^3.5.13",
+        "@vuepic/vue-datepicker": "^11.0.3",
         "@vueuse/core": "^12.8.2",
         "bootstrap": "^5.3.7",
         "bootstrap-vue": "^2.23.1",
