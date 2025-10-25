@@ -8,7 +8,7 @@ import {onMounted, ref, watch, toRaw, useTemplateRef} from 'vue';
 
 import {useLoading} from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/css/index.css';
-
+//VueDatePicker: https://vue3datepicker.com/
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -35,7 +35,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 	},
 ];
 const $loading = useLoading({});
-
 
 // const datePicker = ref();
 
@@ -408,7 +407,7 @@ async function validateBoard(){
 	});
 	if(boardSize !== wallCount+totalClue) return;
 
-	console.log('validating...')
+	// console.log('validating...')
 	let result:any = false;
 
 	// console.log('checkHas1Wall')
@@ -511,8 +510,8 @@ async function findPuzzleByDate(){
 	slashDate = slashDate.replaceAll("-","/");
 	dateFilter.value = slashDate;
 
+	const loader = $loading.show();
 	try {
-		const loader = $loading.show();
 
 		const v = await axios.post(
 			"/fetchapi",
@@ -521,7 +520,6 @@ async function findPuzzleByDate(){
 				date: slashDate,
 			}
 		)
-		loader.hide();
 		isOpenFilter.value=false;
 
 		move.value = [];
@@ -559,8 +557,10 @@ async function findPuzzleByDate(){
 		clearInterval(interval1);
 	} catch (err) {
 		console.log(err);
+		alert(`API Error: Fetching board failed. `);
 	} finally {
 		// loading.value = false;
+		loader.hide();
 	}
 }
 
@@ -757,26 +757,26 @@ function unfocusPage(){
 					<summary>
 						API
 						&nbsp;&nbsp;&nbsp;<div class="pill-filter" id="filter_difficulty" v-if="!isOpenFilter">
-							Difficulty: {{ difficulty }}
+							Size: {{ difficulty }}
 						</div>
 						<div class="pill-filter" id="filter_date" v-if="!isOpenFilter">
 							Date: {{ dateFilter }}
 						</div>
 					</summary>
 					<div class='det-content'>
-						<table>
+						<table id='tbl_filter' style="width:100%;">
 							<tr>
-								<td>Difficulty</td>
 								<td>
-									<div>
+									Size <br>
+									<div class="wrap_option">
 										<label>
 											<input type="radio" name="" value='small' v-model="difficulty">
 											Small
-										</label> |
+										</label>
 										<label>
 											<input type="radio" name="" value='medium'  v-model="difficulty">
 											Medium
-										</label> |
+										</label>
 										<label>
 											<input type="radio" name="" value='large'  v-model="difficulty">
 											Large
@@ -786,14 +786,11 @@ function unfocusPage(){
 								</td>
 							</tr>
 							<tr>
-								<td style="vertical-align: top;">Date</td>
 								<td>
-									<div>
-										<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
-											:dark="isDarkMode" week-start="0"
-											style="zoom:.7;"
-										></VueDatePicker>
-									</div>
+									Date
+									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
+										:dark="isDarkMode" week-start="0"
+									></VueDatePicker>
 								</td>
 							</tr>
 						</table>
@@ -807,7 +804,7 @@ function unfocusPage(){
 
 			</div>
 
-			<div id='fullboardchange' style='margin:auto;'>
+			<div id='fullboardchange' style='margin: 0px auto;'>
 				<button class='btn btn-success' @click='reset()'>reset</button>
 				<button class='btn btn-success' @click='saveBoard()'>save board</button>
 				<button class='btn btn-success' @click='loadBoard()'>load board</button>

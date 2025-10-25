@@ -167,4 +167,32 @@ table#gameboard {
   padding: 0.125em;
   display: inline-block;
   margin-left: 0.25em;
+  border-radius: 0.25em;
+}
+
+#det_api #tbl_filter td {
+  padding: 0.5em 0;
+}
+
+.wrap_option {
+  --option-color: gray;
+  display: inline-block;
+  border: 2px solid var(--option-color);
+  border-radius: 0.25em;
+  overflow: hidden;
+}
+.wrap_option > label:has(input[type=radio]) {
+  padding: 0.25em 0.5em;
+  border-right: 2px solid var(--option-color);
+  cursor: pointer;
+}
+.wrap_option > label:has(input[type=radio]):last-child {
+  border-right: none;
+}
+.wrap_option input[type=radio] {
+  display: none;
+}
+.wrap_option > label:has(input[type=radio]:checked) {
+  background-color: var(--option-color);
+  color: white;
 }/*# sourceMappingURL=board.css.map */
