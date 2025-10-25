@@ -115,8 +115,8 @@ onMounted(()=>{
 	dateFilter.value = slashDate;
 
 	isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-	difficulty.value = 'small'
+	difficulty.value = 'small';
+	findPuzzleByDate()
 })
 
 watch(board, (newBoard)=>{
@@ -413,17 +413,20 @@ async function validateBoard(){
 
 	// console.log('checkHas1Wall')
 	result = await checkHas1Wall(root);
+	clearHighlight()
 	// console.log(result)
 	if(! result) return
 
 	// console.log('checkFor2By2')
 	result = await checkFor2By2()
+	clearHighlight()
 	// console.log(result)
 	if(! result) return
 
 	// clearHighlight()
 	// console.log('checkHintsSatified')
 	result = await checkHintsSatified()
+	clearHighlight()
 	// console.log(result)
 	if(! result) return
 
@@ -785,9 +788,12 @@ function unfocusPage(){
 							<tr>
 								<td style="vertical-align: top;">Date</td>
 								<td>
-  									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
-									  :dark="isDarkMode"
-									></VueDatePicker>
+									<div>
+										<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
+											:dark="isDarkMode" week-start="0"
+											style="zoom:.7;"
+										></VueDatePicker>
+									</div>
 								</td>
 							</tr>
 						</table>
