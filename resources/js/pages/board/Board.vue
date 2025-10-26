@@ -306,14 +306,14 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 
 			remainder=remainder-1;
 			// if(isIgnoreIsles) break;
-			if(remainder==0) break;
+			// if(remainder==0) break;
 		}
 
 		$(`#item-${square[0]}_${square[1]}`).css('--count', "'"+(hintVal-remainder)+"'")
 		boardClass.value[square[0]][square[1]].root_highlight = true;
 
-		if(remainder == 0){
-			resolve(0);
+		if(remainder <= 0){
+			resolve(remainder);
 			return;
 		}
 
@@ -418,18 +418,18 @@ async function validateBoard(){
 
 	// console.log('checkFor2By2')
 	result = await checkFor2By2()
-	clearHighlight()
+	// clearHighlight()
 	// console.log(result)
 	if(! result) return
 
 	// clearHighlight()
 	// console.log('checkHintsSatified')
 	result = await checkHintsSatified()
-	clearHighlight()
+	// clearHighlight()
 	// console.log(result)
 	if(! result) return
 
-	clearHighlight()
+	// clearHighlight()
 	alert("You WON!")
 
 	$("#gameboard").addClass('won');
@@ -493,10 +493,11 @@ function checkHintsSatified(){
 			ctr = await highlightIsland(element, true)
 			// console.log($(`#item-${element[0]}_${element[1]}`))
 
-			if(ctr!==0){
-				resolve(false);
-				return;
-			}
+			clearHighlight()
+			if(ctr==0) continue;
+
+			resolve(false);
+			return;
 		}
 		resolve(ctr==0)
 	})
@@ -725,7 +726,6 @@ function unfocusPage(){
 			@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 			ref="loadingContainer"
 		>
-			<br>
 			<div style="margin-bottom:1em;">
 				<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">
 				<input type='button' value='Submit' class="btn btn-primary" onclick="$('#inputFile').change()"> -->
