@@ -33,7 +33,7 @@ Route::get('explanation', function () {
 })->middleware(['auth', 'verified'])->name('Explanation');
 
 
-Route::get('board', [NurikabeApiController::class, 'playBoard'])
+Route::get('board/{size?}/{year:year?}/{month:month?}/{day:day?}', [NurikabeApiController::class, 'playBoard'])
     ->middleware(['auth', 'verified'])->name('Board');
 
 Route::post('fetchapi', [NurikabeApiController::class, 'getBoard']);

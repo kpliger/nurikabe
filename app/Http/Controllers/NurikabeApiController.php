@@ -23,9 +23,13 @@ class NurikabeApiController extends Controller
 		echo $response;
 	}
 
-	public function playBoard(Request $request){
+	public function playBoard(Request $request, ?string $size=null, ?int $year=null, ?int $month=null, ?int $day=null){
 		return Inertia::render("board/Board", [
-			"user"=> $request->user(),
+			"user"	=> $request->user(),
+			"size"	=> $size,
+			"year"	=> $year,
+			"month"	=> $month,
+			"day"	=> $day,
 		]);
 	}
 }

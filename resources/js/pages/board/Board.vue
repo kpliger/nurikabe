@@ -38,9 +38,13 @@ const $loading = useLoading({});
 
 // const datePicker = ref();
 
-// const props = defineProps({
-// 	user:Object,
-// })
+const props = defineProps({
+	user:Object,
+	size: String,
+	year: Number,
+	month: Number,
+	day: Number,
+})
 // const curUser = toRaw(prompt.user);
 // const page = usePage<SharedData>();
 // const user = page.props.auth.user as User;
@@ -82,7 +86,7 @@ const difficulty = ref('');
 const date = ref();
 
 const dateFilter = ref();
-const isOpenFilter = ref(true);
+const isOpenFilter = ref(false);
 
 const gameTimer = ref("00:00");
 const timerval1 = ref(0);
@@ -107,19 +111,27 @@ const boardClass:any = ref([]);
 
 onMounted(()=>{
 	date.value = new Date();
-
-	let slashDate = date.value.toISOString();
-	slashDate = slashDate.slice(0,10)
-	slashDate = slashDate.replaceAll("-","/");
-	dateFilter.value = slashDate;
+	if(Number(props.year)>0) date.value.setYear(props.year);
+	if(Number(props.month)>0) date.value.setMonth(props.month-1);
+	if(Number(props.day)>0) date.value.setDate(props.day);
 
 	isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
 	difficulty.value = 'small';
+	if(['small', 'medium', 'large'].includes(props.size)){
+		difficulty.value = props.size;
+	}
 	findPuzzleByDate()
 })
 
 watch(board, (newBoard)=>{
 	$("#gameboard").removeClass('won');
+
+	$('#btnUndo').prop('disabled', false);
+	$('#btnRedo').prop('disabled', false);
+	$('#btnSave').prop('disabled', false);
+	$('#btnLoad').prop('disabled', false);
+
 	clearBoard(newBoard)
 
 })
@@ -431,10 +443,14 @@ async function validateBoard(){
 
 	// clearHighlight()
 	alert("You WON!")
-
 	$("#gameboard").addClass('won');
+	$('#btnUndo').prop('disabled', true);
+	$('#btnRedo').prop('disabled', true);
+	$('#btnSave').prop('disabled', true);
+	$('#btnLoad').prop('disabled', true);
 	// console.log("You Won");
 	clearInterval(interval1);
+
 
 	recordWin();
 }
@@ -506,9 +522,9 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 async function findPuzzleByDate(){
-	let slashDate = date.value.toISOString();
-	slashDate = slashDate.slice(0,10)
-	slashDate = slashDate.replaceAll("-","/");
+	let slashDate = date.value.getFullYear()+"/"+
+		(date.value.getMonth()+1)+"/"+
+		date.value.getDate();
 	dateFilter.value = slashDate;
 
 	const loader = $loading.show();
@@ -531,6 +547,11 @@ async function findPuzzleByDate(){
 		const g = data.data.startingGrid;
 
 		ogboard =[[]]
+
+		//change url without
+		let urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
+			window.history.pushState({},"", urlPath);
+
 
 		let boardWidth = $('.wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
@@ -673,7 +694,7 @@ function randomFetch(){
 async function recordWin(){
 	let formData ={
 		difficulty: difficulty.value,
-		date: date.value,
+		date: dateFilter.value,
 		time: timerval1.value
 	}
 
@@ -684,7 +705,7 @@ async function recordWin(){
 			"/history/recordWin",
 			formData
 		)
-		console.log(v.data)
+		// console.log(v.data)
 	} catch (err) {
 		console.log(err);
 	} finally {
@@ -806,8 +827,8 @@ function unfocusPage(){
 
 			<div id='fullboardchange' style='margin: 0px auto;'>
 				<button class='btn btn-success' @click='reset()'>reset</button>
-				<button class='btn btn-success' @click='saveBoard()'>save board</button>
-				<button class='btn btn-success' @click='loadBoard()'>load board</button>
+				<button class='btn btn-success' @click='saveBoard()' id="btnSave">save board</button>
+				<button class='btn btn-success' @click='loadBoard()' id="btnLoad">load board</button>
 			</div>
 			<div style="margin-bottom: .25em;">
 				<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
