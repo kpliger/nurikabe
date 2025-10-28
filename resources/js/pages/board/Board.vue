@@ -41,9 +41,9 @@ const $loading = useLoading({});
 const props = defineProps({
 	user:Object,
 	size: String,
-	year: Number,
-	month: Number,
-	day: Number,
+	year: String,
+	month: String,
+	day: String,
 })
 // const curUser = toRaw(prompt.user);
 // const page = usePage<SharedData>();
@@ -110,23 +110,39 @@ const boardClass:any = ref([]);
 
 
 onMounted(()=>{
-	date.value = new Date();
-	if(Number(props.year)>0) date.value.setYear(props.year);
-	if(Number(props.month)>0) date.value.setMonth(props.month-1);
-	if(Number(props.day)>0) date.value.setDate(props.day);
-
 	isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 	difficulty.value = 'small';
 	if(['small', 'medium', 'large'].includes(props.size)){
 		difficulty.value = props.size;
 	}
+	const timezoneoffset = getTimezoneOffset();
+	let initMonth = props.month||'';
+	let initDay  = props.day||'';
+	let initDate = '';
+
+	if(initMonth.length<2) initMonth = '0'+initMonth;
+	if(initDay.length<2) initDay = '0'+initDay;
+	initDate = `${props.year||''}-${initMonth}-${initDay}T00:00:00${timezoneoffset}`
+	// console.log(initDate)
+	date.value = new Date(initDate);
+	// console.log(date.value)
+	if(date.value == 'Invalid Date'){
+		if(props.year == null){
+			date.value = new Date();
+		}else{
+			alert('Invalid date. ');
+			return
+		}
+	}
 	findPuzzleByDate()
+
 })
 
 watch(board, (newBoard)=>{
 	$("#gameboard").removeClass('won');
 
+	$('#btnReset').prop('disabled', false);
 	$('#btnUndo').prop('disabled', false);
 	$('#btnRedo').prop('disabled', false);
 	$('#btnSave').prop('disabled', false);
@@ -521,7 +537,19 @@ function checkHintsSatified(){
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
+function convertTZ(date, tzString) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+}
+function getTimezoneOffset():string{
+	let offset = (new Date).getTimezoneOffset();
+	let sign = offset<0?'+':'-';
+	let hour = ('0'+Math.abs(offset/60)).slice(-2);
+	let minute = ('0'+offset%60).slice(-2);
+	return `${sign}${hour}:${minute}`;
+}
+
 async function findPuzzleByDate(){
+
 	let slashDate = date.value.getFullYear()+"/"+
 		(date.value.getMonth()+1)+"/"+
 		date.value.getDate();
@@ -826,22 +854,22 @@ function unfocusPage(){
 			</div>
 
 			<div id='fullboardchange' style='margin: 0px auto;'>
-				<button class='btn btn-success' @click='reset()'>reset</button>
-				<button class='btn btn-success' @click='saveBoard()' id="btnSave">save board</button>
-				<button class='btn btn-success' @click='loadBoard()' id="btnLoad">load board</button>
+				<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
+				<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save board</button>
+				<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load board</button>
 			</div>
 			<div style="margin-bottom: .25em;">
 				<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
 					<div style='font-family: monospace; font-size: 1.5em;'>{{gameTimer}}</div>
 					<div>
-						<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()">
-						<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()">
+						<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
+						<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>
 					</div>
 				</div>
 			</div>
 			<div>
 				<div class="wrap_board">
-					<table id='gameboard'>
+					<table id='gameboard' class="won">
 						<tr v-for='(_,x) in board.length' :key='x' class=''>
 							<td v-for='(_, y) in board[x].length' :key='y' class='square'
 								@click="setSquare(x, y)"
