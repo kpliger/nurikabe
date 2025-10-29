@@ -168,6 +168,7 @@ table#gameboard {
   display: inline-block;
   margin-left: 0.25em;
   border-radius: 0.25em;
+  font-size: 0.8em;
 }
 
 #det_api #tbl_filter td {

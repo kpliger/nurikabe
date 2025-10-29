@@ -292,6 +292,10 @@ async function highlightWall(square:number[]) {
 				boardClass.value[value[0]+coord[0]][value[1]+coord[1]]['wall_highlighted-'+inverseDirections[direction]]=false;
 				return;
 			}
+			if(board.value[value[0]+coord[0]][value[1]+coord[1]] == '  '){
+				neighboringSquare.island_highlighted = true;
+
+			}
 			if(!neighboringSquare.wall) return;
 
 			queue.push([value[0]+coord[0],value[1]+coord[1]])
