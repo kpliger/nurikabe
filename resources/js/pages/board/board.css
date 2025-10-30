@@ -1,6 +1,7 @@
 @charset "UTF-8";
 #nurikabe {
   --sqr_size:31px;
+  --col_count: 6;
 }
 
 .btn {
@@ -89,6 +90,7 @@ table#gameboard {
   border: 3px solid;
   margin: 0.5em auto;
   position: relative;
+  width: calc(var(--sqr_size) * var(--col_count) * 1.7);
 }
 
 #det_api,
@@ -114,6 +116,7 @@ table#gameboard {
 
 .wrap_board {
   position: relative;
+  overflow: auto;
 }
 
 #fullboardchange {

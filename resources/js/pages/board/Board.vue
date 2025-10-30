@@ -107,6 +107,7 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
+const boardZoom:Number = ref(1);
 
 
 onMounted(()=>{
@@ -155,6 +156,10 @@ watch(timerval1, (newVal)=>{
 	let second =  String(newVal%60).padStart(2,'0');
 	let minute =  String(parseInt(newVal/60)).padStart(2,'0');
 	gameTimer.value = minute+":"+second;
+})
+watch(boardZoom, (val)=>{
+	console.log(val);
+	$('#gameboard').css('transform', 'scale('+val+')');
 })
 
 clearBoard(board.value)
@@ -583,16 +588,24 @@ async function findPuzzleByDate(){
 
 		//change url without
 		let urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
-			window.history.pushState({},"", urlPath);
+		window.history.pushState({},"", urlPath);
 
 
+		// update scale
+		const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
 		let boardWidth = $('.wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
+		let boardWrapWidth = sqrSize * 1.7 * w;
+		const boardScale = boardWidth/boardWrapWidth;
+		console.log(boardScale.toFixed(2))
+		$('#gameboard').css('transform', 'scale('+boardScale+')');
 
-		let cellSize = (boardWidth/w)/1.9;
-		cellSize = Math.min(cellSize, 30);
 
-		$('#nurikabe').css('--sqr_size', cellSize+'px');
+		// let cellSize = (boardWidth/w)/1.9;
+		// cellSize = Math.min(cellSize, 30);
+		$('#nurikabe').css('--col_count', w);
+		// $('#nurikabe').css('--sqr_size', cellSize+'px');
+
 
 		Object.entries(g).forEach(([k,v]) => {
 			const x = parseInt(k/w);
@@ -811,7 +824,7 @@ function unfocusPage(){
 				</div>
 			</details>
 
-			<div id='wrap_gameactions' style="position: sticky; top: 0;">
+			<div id='wrap_gameactions' style="position: sticky; top: 0; margin-top: -1em;">
 				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
 					<summary>
 						API
@@ -875,8 +888,8 @@ function unfocusPage(){
 						</div>
 					</div>
 				</div>
+				<input type="range" name="" id="" v-model='boardZoom' min="0" max='3' step=".01" style="width:100%;">
 			</div>
-
 			<div>
 				<div class="wrap_board">
 					<table id='gameboard' class="won">

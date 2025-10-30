@@ -1,6 +1,6 @@
 #nurikabe{
 	--sqr_size:31px;
-	// --col_count: 6;
+	--col_count: 6;
 }
 .btn {
 	margin: 0 .25em;
@@ -84,7 +84,7 @@ table#gameboard {
 	margin: .5em auto;
 	position: relative;
 	// width:100%;
-	// width:calc(var(--sqr_size)*var(--col_count));
+	width:calc(var(--sqr_size)*var(--col_count)*1.7);
 }
 
 #det_api,
@@ -111,7 +111,7 @@ table#gameboard {
 }
 .wrap_board{
 	position: relative;
-	// overflow: scroll;
+	overflow: auto;
 	// height: calc(100vh - 170px);
 	// width: calc(100% - 150px);
 	// display: inline-block;
