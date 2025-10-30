@@ -541,9 +541,6 @@ function checkHintsSatified(){
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
-function convertTZ(date, tzString) {
-    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
-}
 function getTimezoneOffset():string{
 	let offset = (new Date).getTimezoneOffset();
 	let sign = offset<0?'+':'-';
@@ -553,7 +550,6 @@ function getTimezoneOffset():string{
 }
 
 async function findPuzzleByDate(){
-
 	let slashDate = date.value.getFullYear()+"/"+
 		(date.value.getMonth()+1)+"/"+
 		date.value.getDate();
@@ -569,6 +565,11 @@ async function findPuzzleByDate(){
 				date: slashDate,
 			}
 		)
+
+		if(v.data == ""){
+			throw "No record found";
+		}
+
 		isOpenFilter.value=false;
 
 		move.value = [];
@@ -724,9 +725,13 @@ function randomFetch(){
 	findPuzzleByDate()
 }
 async function recordWin(){
+
+	const winDate = date.value.getFullYear()+ '-'+
+		('0'+(date.value.getMonth()+1)).slice(-2)+ '-'+
+		('0'+date.value.getDate()).slice(-2)
 	let formData ={
 		difficulty: difficulty.value,
-		date: dateFilter.value,
+		date: winDate,
 		time: timerval1.value
 	}
 
@@ -779,33 +784,34 @@ function unfocusPage(){
 			@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 			ref="loadingContainer"
 		>
-			<div style="margin-bottom:1em;">
-				<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">
-				<input type='button' value='Submit' class="btn btn-primary" onclick="$('#inputFile').change()"> -->
-				<select name='' id='ddlPuzzle' autocomplete="off" style='display: none;'>
-					<option value=''>Select item</option>
-					<!-- <?php foreach ($files1 as $key => $value) {
-						if (in_array($value,array(".",".."))) continue;
-						echo "<option>$value</option>";
-					}?> -->
-				</select>
-				<details id='det_help'>
-					<summary>Help</summary>
-					<div class='det-content'>
-						<ul>
-							<li>Wall cells are full filled cell</li>
-							<li>Hint cells are cell with a number.</li>
-							<li>Island cells are cell with a dot.</li>
-							<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
-							<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
-							<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
-							<li>Ctrl+Z = Undo</li>
-							<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
-							<li>The first few walls are filled in.</li>
+			<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">
+			<input type='button' value='Submit' class="btn btn-primary" onclick="$('#inputFile').change()"> -->
+			<select name='' id='ddlPuzzle' autocomplete="off" style='display: none;'>
+				<option value=''>Select item</option>
+				<!-- <?php foreach ($files1 as $key => $value) {
+					if (in_array($value,array(".",".."))) continue;
+					echo "<option>$value</option>";
+				}?> -->
+			</select>
+			<details id='det_help'>
+				<summary>Help</summary>
+				<div class='det-content'>
+					<ul>
+						<li>Wall cells are full filled cell</li>
+						<li>Hint cells are cell with a number.</li>
+						<li>Island cells are cell with a dot.</li>
+						<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
+						<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
+						<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
+						<li>Ctrl+Z = Undo</li>
+						<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
+						<li>The first few walls are filled in.</li>
 
-						</ul>
-					</div>
-				</details>
+					</ul>
+				</div>
+			</details>
+
+			<div id='wrap_gameactions' style="position: sticky; top: 0;">
 				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
 					<summary>
 						API
@@ -855,22 +861,22 @@ function unfocusPage(){
 					</div>
 				</details>
 
-			</div>
-
-			<div id='fullboardchange' style='margin: 0px auto;'>
-				<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
-				<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save board</button>
-				<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load board</button>
-			</div>
-			<div style="margin-bottom: .25em;">
-				<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
-					<div style='font-family: monospace; font-size: 1.5em;'>{{gameTimer}}</div>
-					<div>
-						<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
-						<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>
+				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
+					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
+					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save board</button>
+					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load board</button>
+				</div>
+				<div style="margin-bottom: .25em;">
+					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
+						<div style='font-family: monospace; font-size: 1.5em;'>{{gameTimer}}</div>
+						<div>
+							<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
+							<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>
+						</div>
 					</div>
 				</div>
 			</div>
+
 			<div>
 				<div class="wrap_board">
 					<table id='gameboard' class="won">

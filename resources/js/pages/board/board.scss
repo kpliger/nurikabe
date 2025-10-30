@@ -193,3 +193,14 @@ table#gameboard {
 		color:white;
 	}
 }
+#wrap_gameactions{
+	position: sticky;
+	top: 0;
+	background-color:white;
+	padding-bottom: .5em;
+	z-index: 1;
+
+	@media (prefers-color-scheme: dark) {
+		background-color:black;
+	}
+}

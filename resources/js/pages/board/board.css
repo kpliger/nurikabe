@@ -196,4 +196,17 @@ table#gameboard {
 .wrap_option > label:has(input[type=radio]:checked) {
   background-color: var(--option-color);
   color: white;
+}
+
+#wrap_gameactions {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding-bottom: 0.5em;
+  z-index: 1;
+}
+@media (prefers-color-scheme: dark) {
+  #wrap_gameactions {
+    background-color: black;
+  }
 }/*# sourceMappingURL=board.css.map */
