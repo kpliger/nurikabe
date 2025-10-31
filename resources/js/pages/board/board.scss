@@ -114,11 +114,11 @@ table#gameboard {
 	overflow: auto;
 	// height: calc(100vh - 170px);
 	// width: calc(100% - 150px);
-	min-height: calc(100vh - 350px);
+	min-height: calc(100vh - 200px);
 	// display: inline-block;
 	// touch-action: none; /* Prevent default touch behavior */
-	touch-action: pan-x pan-y;
-
+	touch-action: pan-y pan-x;
+	padding-bottom: 2em;
 }
 #fullboardchange{
 	margin: auto;

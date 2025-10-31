@@ -835,7 +835,7 @@ function pointermoveHandler(ev) {
 
 		if(prevDiff !== 100000){
 			// console.log(curDiff-prevDiff)
-			let newZoom = parseFloat(boardZoom.value) + ((curDiff-prevDiff)/4);
+			let newZoom = parseFloat(boardZoom.value) + ((curDiff-prevDiff)/8);
 			newZoom = Math.min(40, newZoom);
 			newZoom = Math.max(newZoom, 6);
 			boardZoom.value = newZoom.toFixed(1);

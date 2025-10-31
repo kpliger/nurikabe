@@ -117,8 +117,9 @@ table#gameboard {
 #wrap_board {
   position: relative;
   overflow: auto;
-  min-height: calc(100vh - 350px);
-  touch-action: pan-x pan-y;
+  min-height: calc(100vh - 200px);
+  touch-action: pan-y pan-x;
+  padding-bottom: 2em;
 }
 
 #fullboardchange {
