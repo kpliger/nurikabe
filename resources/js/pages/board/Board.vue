@@ -107,7 +107,7 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
-const boardZoom:Number = ref(1);
+const boardZoom = ref(30);
 
 
 onMounted(()=>{
@@ -159,7 +159,8 @@ watch(timerval1, (newVal)=>{
 })
 watch(boardZoom, (val)=>{
 	console.log(val);
-	$('#gameboard').css('transform', 'scale('+val+')');
+	// $('#gameboard').css('transform', 'scale('+val+')');
+	$('#nurikabe').css('--sqr_size', val+'px');
 })
 
 clearBoard(board.value)
@@ -592,19 +593,20 @@ async function findPuzzleByDate(){
 
 
 		// update scale
-		const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
+		// const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
 		let boardWidth = $('.wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
-		let boardWrapWidth = sqrSize * 1.7 * w;
-		const boardScale = boardWidth/boardWrapWidth;
-		console.log(boardScale.toFixed(2))
-		$('#gameboard').css('transform', 'scale('+boardScale+')');
+		// let boardWrapWidth = sqrSize * 1.7 * w;
+		// const boardScale = boardWidth/boardWrapWidth;
+		// console.log(boardScale.toFixed(2))
+		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
 
-		// let cellSize = (boardWidth/w)/1.9;
-		// cellSize = Math.min(cellSize, 30);
+		boardZoom.value = (boardWidth/w)/1.7;
+		boardZoom.value = Math.min(boardZoom.value, 30);
+		boardZoom.value = boardZoom.value.toFixed(1);
+
 		$('#nurikabe').css('--col_count', w);
-		// $('#nurikabe').css('--sqr_size', cellSize+'px');
 
 
 		Object.entries(g).forEach(([k,v]) => {
@@ -888,7 +890,7 @@ function unfocusPage(){
 						</div>
 					</div>
 				</div>
-				<input type="range" name="" id="" v-model='boardZoom' min="0" max='3' step=".01" style="width:100%;">
+				<input type="range" name="" id="" v-model='boardZoom' min="6" max='40' step=".1" style="width:100%;">
 			</div>
 			<div>
 				<div class="wrap_board">

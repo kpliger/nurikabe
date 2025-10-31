@@ -85,6 +85,7 @@ table#gameboard {
 	position: relative;
 	// width:100%;
 	width:calc(var(--sqr_size)*var(--col_count)*1.7);
+	// max-height:calc(100vh - 400px)
 }
 
 #det_api,
