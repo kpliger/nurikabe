@@ -107,7 +107,7 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
-const boardZoom = ref(30);
+const boardZoom:number = ref(30);
 
 
 onMounted(()=>{
@@ -136,6 +136,19 @@ onMounted(()=>{
 			return
 		}
 	}
+
+	el = document.getElementById("wrap_board");
+	el.onpointerdown = pointerdownHandler;
+	el.onpointermove = pointermoveHandler;
+
+	// Use same handler for pointer{up,cancel,out,leave} events since
+	// the semantics for these events - in this app - are the same.
+	el.onpointerup = pointerupHandler;
+	el.onpointercancel = pointerupHandler;
+	el.onpointerout = pointerupHandler;
+	el.onpointerleave = pointerupHandler;
+
+
 	findPuzzleByDate()
 
 })
@@ -158,7 +171,7 @@ watch(timerval1, (newVal)=>{
 	gameTimer.value = minute+":"+second;
 })
 watch(boardZoom, (val)=>{
-	console.log(val);
+	// console.log(val);
 	// $('#gameboard').css('transform', 'scale('+val+')');
 	$('#nurikabe').css('--sqr_size', val+'px');
 })
@@ -594,7 +607,7 @@ async function findPuzzleByDate(){
 
 		// update scale
 		// const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
-		let boardWidth = $('.wrap_board').css('width'); // get board width
+		let boardWidth = $('#wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
 		// let boardWrapWidth = sqrSize * 1.7 * w;
 		// const boardScale = boardWidth/boardWrapWidth;
@@ -602,9 +615,9 @@ async function findPuzzleByDate(){
 		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
 
-		boardZoom.value = (boardWidth/w)/1.7;
-		boardZoom.value = Math.min(boardZoom.value, 30);
-		boardZoom.value = boardZoom.value.toFixed(1);
+		let zoom = (boardWidth/w)/1.8;
+		zoom = Math.min(zoom, 30);
+		boardZoom.value = zoom.toFixed(1);
 
 		$('#nurikabe').css('--col_count', w);
 
@@ -778,6 +791,92 @@ function unfocusPage(){
 	console.log('Tab is now blurred');
 	clearInterval(interval1);
 }
+function pinchZoom(){
+	console.log('asdf')
+}
+
+// ++++++PINCH
+
+// Global vars to cache event state
+const evCache = [];
+let prevDiff = 100000;
+// Install event handlers for the pointer target
+let el;
+
+
+function pointerdownHandler(ev) {
+	// The pointerdown event signals the start of a touch interaction.
+	// This event is cached to support 2-finger gestures
+	evCache.push(ev);
+
+	// prevDiff =
+}
+function pointermoveHandler(ev) {
+	// This function implements a 2-pointer horizontal pinch/zoom gesture.
+	//
+	// If the distance between the two pointers has increased (zoom in),
+	// the target element's background is changed to "pink" and if the
+	// distance is decreasing (zoom out), the color is changed to "lightblue".
+	//
+	// This function sets the target element's border to "dashed" to visually
+	// indicate the pointer's target received a move event.
+	//   ev.target.style.border = "dashed";
+
+	// Find this event in the cache and update its record with this event
+	const index = evCache.findIndex(
+		(cachedEv) => cachedEv.pointerId === ev.pointerId,
+	);
+	evCache[index] = ev;
+
+  	// If two pointers are down, check for pinch gestures
+	if (evCache.length === 2) {
+		// Calculate the distance between the two pointers
+		const curDiff = Math.sqrt(Math.pow(evCache[0].clientX - evCache[1].clientX,2)+Math.pow(evCache[0].clientY - evCache[1].clientY,2));
+
+		if(prevDiff !== 100000){
+			// console.log(curDiff-prevDiff)
+			let newZoom = parseFloat(boardZoom.value) + ((curDiff-prevDiff)/4);
+			newZoom = Math.min(40, newZoom);
+			newZoom = Math.max(newZoom, 6);
+			boardZoom.value = newZoom.toFixed(1);
+		}
+		// if (prevDiff > 0) {
+		//   if (curDiff > prevDiff) {
+		//     // The distance between the two pointers has increased
+		//     ev.target.style.background = "pink";
+		//   }
+		//   if (curDiff < prevDiff) {
+		//     // The distance between the two pointers has decreased
+		//     ev.target.style.background = "lightblue";
+		//   }
+		// }
+
+		// Cache the distance for the next move event
+		prevDiff = curDiff;
+	}
+}
+function pointerupHandler(ev) {
+	// Remove this pointer from the cache and reset the target's
+	// background and border
+	removeEvent(ev);
+	//   ev.target.style.background = "white";
+	//   ev.target.style.border = "1px solid black";
+
+	// If the number of pointers down is less than two then reset diff tracker
+	if (evCache.length < 2) {
+		prevDiff = 100000;
+	}
+}
+function removeEvent(ev) {
+	// Remove this event from the target's cache
+	const index = evCache.findIndex(
+		(cachedEv) => cachedEv.pointerId === ev.pointerId,
+	);
+	evCache.splice(index, 1);
+}
+
+// ------PINCH ACTION
+
 
 
 </script>
@@ -893,7 +992,7 @@ function unfocusPage(){
 				<input type="range" name="" id="" v-model='boardZoom' min="6" max='40' step=".1" style="width:100%;">
 			</div>
 			<div>
-				<div class="wrap_board">
+				<div id="wrap_board">
 					<table id='gameboard' class="won">
 						<tr v-for='(_,x) in board.length' :key='x' class=''>
 							<td v-for='(_, y) in board[x].length' :key='y' class='square'

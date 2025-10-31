@@ -87,7 +87,7 @@ details ul li::marker {
 }
 
 table#gameboard {
-  border: 3px solid;
+  border: 5px solid;
   margin: 0.5em auto;
   position: relative;
   width: calc(var(--sqr_size) * var(--col_count) * 1.7);
@@ -114,9 +114,11 @@ table#gameboard {
   background-color: rgba(0, 0, 180, 0.05);
 }
 
-.wrap_board {
+#wrap_board {
   position: relative;
   overflow: auto;
+  min-height: calc(100vh - 350px);
+  touch-action: none; /* Prevent default touch behavior */
 }
 
 #fullboardchange {

@@ -79,13 +79,12 @@ details ul{
 	}
 }
 table#gameboard {
-	border:3px solid;
+	border:5px solid;
 	// display: inline-block;
 	margin: .5em auto;
 	position: relative;
 	// width:100%;
 	width:calc(var(--sqr_size)*var(--col_count)*1.7);
-	// max-height:calc(100vh - 400px)
 }
 
 #det_api,
@@ -110,12 +109,15 @@ table#gameboard {
 
 	}
 }
-.wrap_board{
+#wrap_board{
 	position: relative;
 	overflow: auto;
 	// height: calc(100vh - 170px);
 	// width: calc(100% - 150px);
+	min-height: calc(100vh - 350px);
 	// display: inline-block;
+	touch-action: none; /* Prevent default touch behavior */
+
 }
 #fullboardchange{
 	margin: auto;
