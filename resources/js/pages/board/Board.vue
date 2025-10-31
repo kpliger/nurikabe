@@ -781,18 +781,15 @@ async function recordWin(){
 
 function focusPage(){
 	// Code to execute when the tab gains focus
-	console.log('Tab is now focused');
+	// console.log('Tab is now focused');
 	if(timerRunning){
 		interval1 = setInterval(()=>{timerval1.value++}, 1000);
 	}
 }
 function unfocusPage(){
 	// Code to execute when the tab loses focus
-	console.log('Tab is now blurred');
+	// console.log('Tab is now blurred');
 	clearInterval(interval1);
-}
-function pinchZoom(){
-	console.log('asdf')
 }
 
 // ++++++PINCH
@@ -800,6 +797,7 @@ function pinchZoom(){
 // Global vars to cache event state
 const evCache = [];
 let prevDiff = 100000;
+let prevCoord = [100000,100000];
 // Install event handlers for the pointer target
 let el;
 
@@ -808,8 +806,6 @@ function pointerdownHandler(ev) {
 	// The pointerdown event signals the start of a touch interaction.
 	// This event is cached to support 2-finger gestures
 	evCache.push(ev);
-
-	// prevDiff =
 }
 function pointermoveHandler(ev) {
 	// This function implements a 2-pointer horizontal pinch/zoom gesture.
@@ -854,6 +850,24 @@ function pointermoveHandler(ev) {
 		// Cache the distance for the next move event
 		prevDiff = curDiff;
 	}
+	else if(evCache.length === 1){
+		// console.log('asdf');
+		let xCoord = evCache[0].clientX;
+		let yCoord = evCache[0].clientY;
+		if(prevCoord[0] !== 100000){
+			let xDiff = xCoord - prevCoord[0];
+			let yDiff = yCoord - prevCoord[1];
+			// console.log(xDiff, yDiff)
+
+			const boardWrapper = document.getElementById('wrap_board');
+			window.scrollBy({top: -yDiff})
+			boardWrapper?.scrollBy({left: -xDiff})
+
+
+		}
+		prevCoord[0] = xCoord;
+		prevCoord[1] = yCoord;
+	}
 }
 function pointerupHandler(ev) {
 	// Remove this pointer from the cache and reset the target's
@@ -865,6 +879,9 @@ function pointerupHandler(ev) {
 	// If the number of pointers down is less than two then reset diff tracker
 	if (evCache.length < 2) {
 		prevDiff = 100000;
+	}
+	if (evCache.length < 1) {
+		prevCoord = [100000,100000];
 	}
 }
 function removeEvent(ev) {
@@ -891,9 +908,11 @@ function removeEvent(ev) {
 
 	<Head title="Board" />
 
-	<AppLayout :breadcrumbs="breadcrumbs" @blur='unfocusPage()' @focus='focusPage()'>
-		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
+	<AppLayout :breadcrumbs="breadcrumbs"
 			tabindex='0'
+			@blur='unfocusPage()' @focus='focusPage()'>
+		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
+
 			@click.exact='resetHighlighting()' @keyup.ctrl.z.exact='undo()'
 			@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 			ref="loadingContainer"
@@ -990,6 +1009,29 @@ function removeEvent(ev) {
 					</div>
 				</div>
 				<input type="range" name="" id="" v-model='boardZoom' min="6" max='40' step=".1" style="width:100%;">
+				<!-- Modal -->
+				<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+					Launch demo modal
+				</button>
+				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								...
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+								<button type="button" class="btn btn-primary">Save changes</button>
+							</div>
+						</div>
+					</div>
+				</div> -->
 			</div>
 			<div>
 				<div id="wrap_board">

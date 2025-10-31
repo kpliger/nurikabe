@@ -118,7 +118,7 @@ table#gameboard {
   position: relative;
   overflow: auto;
   min-height: calc(100vh - 200px);
-  touch-action: pan-y pan-x;
+  touch-action: none; /* Prevent default touch behavior */
   padding-bottom: 2em;
 }
 

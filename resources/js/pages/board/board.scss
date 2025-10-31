@@ -116,8 +116,8 @@ table#gameboard {
 	// width: calc(100% - 150px);
 	min-height: calc(100vh - 200px);
 	// display: inline-block;
-	// touch-action: none; /* Prevent default touch behavior */
-	touch-action: pan-y pan-x;
+	touch-action: none; /* Prevent default touch behavior */
+	// touch-action: pan-y pan-x;
 	padding-bottom: 2em;
 }
 #fullboardchange{
