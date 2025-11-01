@@ -480,16 +480,15 @@ async function validateBoard(){
 	// console.log(result)
 	if(! result) return
 
-	// clearHighlight()
-	alert("You WON!")
 	$("#gameboard").addClass('won');
 	$('#btnUndo').prop('disabled', true);
 	$('#btnRedo').prop('disabled', true);
 	$('#btnSave').prop('disabled', true);
 	$('#btnLoad').prop('disabled', true);
-	// console.log("You Won");
+	timerRunning = false;
 	clearInterval(interval1);
-
+	alert("You WON!");
+	// console.log("You Won");
 
 	recordWin();
 }
@@ -615,7 +614,7 @@ async function findPuzzleByDate(){
 		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
 
-		let zoom = (boardWidth/w)/1.8;
+		let zoom = ((boardWidth - 16)/w)/1.8;
 		zoom = Math.min(zoom, 30);
 		boardZoom.value = zoom.toFixed(1);
 
@@ -872,7 +871,13 @@ function pointermoveHandler(ev) {
 function pointerupHandler(ev) {
 	// Remove this pointer from the cache and reset the target's
 	// background and border
-	removeEvent(ev);
+
+	// Remove this event from the target's cache
+	const index = evCache.findIndex(
+		(cachedEv) => cachedEv.pointerId === ev.pointerId,
+	);
+	evCache.splice(index, 1);
+
 	//   ev.target.style.background = "white";
 	//   ev.target.style.border = "1px solid black";
 
@@ -885,11 +890,7 @@ function pointerupHandler(ev) {
 	}
 }
 function removeEvent(ev) {
-	// Remove this event from the target's cache
-	const index = evCache.findIndex(
-		(cachedEv) => cachedEv.pointerId === ev.pointerId,
-	);
-	evCache.splice(index, 1);
+
 }
 
 // ------PINCH ACTION
@@ -909,12 +910,13 @@ function removeEvent(ev) {
 	<Head title="Board" />
 
 	<AppLayout :breadcrumbs="breadcrumbs"
-			tabindex='0'
-			@blur='unfocusPage()' @focus='focusPage()'>
+		tabindex='0'
+		@blur='unfocusPage()' @focus='focusPage()'
+		@keyup.ctrl.z.exact='undo()'
+		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
+	>
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
-
-			@click.exact='resetHighlighting()' @keyup.ctrl.z.exact='undo()'
-			@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
+			@click.exact='resetHighlighting()'
 			ref="loadingContainer"
 		>
 			<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">

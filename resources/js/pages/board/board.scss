@@ -117,8 +117,9 @@ table#gameboard {
 	min-height: calc(100vh - 200px);
 	// display: inline-block;
 	touch-action: none; /* Prevent default touch behavior */
-	// touch-action: pan-y pan-x;
 	padding-bottom: 2em;
+	padding-left: 1em;
+	padding-right: 1em;
 }
 #fullboardchange{
 	margin: auto;
