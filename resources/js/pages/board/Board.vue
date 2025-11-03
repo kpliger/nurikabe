@@ -19,7 +19,7 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import 'bootstrap';
 // import { BootstrapVue, IconsPlugin, BButton } from 'bootstrap-vue'
 
-import {BButton, BModal} from 'bootstrap-vue-next'
+// import {BButton, BModal} from 'bootstrap-vue-next'
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'
