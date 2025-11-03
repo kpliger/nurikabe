@@ -5,19 +5,24 @@ import { SharedData, type BreadcrumbItem, type User } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
 import {onMounted, ref, watch, toRaw, useTemplateRef} from 'vue';
+import { useDark, useToggle } from '@vueuse/core'
+
+import "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"
 
 import {useLoading} from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/css/index.css';
+
 //VueDatePicker: https://vue3datepicker.com/
 import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
+import '@vuepic/vue-datepicker/dist/main.css';
 
-const script = document.createElement('script');
-script.type = 'module';
-script.src = 'https://code.jquery.com/jquery-3.6.3.min.js';
-script.integrity = 'sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=';
-script.crossOrigin = 'anonymous'; // JS property, not HTML attribute
-document.head.appendChild(script);
+import 'bootstrap';
+// import { BootstrapVue, IconsPlugin, BButton } from 'bootstrap-vue'
+
+import {BButton, BModal} from 'bootstrap-vue-next'
+// Import Bootstrap and BootstrapVue CSS files (order is important)
+// import 'bootstrap/dist/css/bootstrap.css'
+// import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 
 /**
@@ -50,8 +55,6 @@ const props = defineProps({
 // const user = page.props.auth.user as User;
 // const curUser = toRaw(user);
 // console.log(curUser);
-
-
 
 const directions = {
 	"left":[0,-1],
@@ -93,8 +96,6 @@ const timerval1 = ref(0);
 let timerRunning = false;
 let interval1 = null;//setInterval(()=>{timerval1.value++}, 1000);
 
-const isDarkMode = ref(false);
-
 const board = ref([
 	["  ","  ","  ","  ","  ","  "],
 	["  ","  "," 5","  ","  ","  "],
@@ -107,12 +108,14 @@ const board = ref([
 ])
 
 const boardClass:any = ref([]);
-const boardZoom:number = ref(30);
+const boardZoom = ref(30);
+const maxZoom = ref(40);
+const minZoom = ref(6);
 
+const isDark = useDark()
+// const toggleDark = useToggle(isDark)
 
 onMounted(()=>{
-	isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
 	difficulty.value = 'small';
 	if(['small', 'medium', 'large'].includes(props.size)){
 		difficulty.value = props.size;
@@ -440,6 +443,7 @@ function reset(){
 	board.value = [...ogboard];
 	move.value = [];
 
+	boardZoom.value = minZoom.value;
 	timerval1.value=0;
 	timerRunning = false;
 	clearInterval(interval1);
@@ -487,7 +491,8 @@ async function validateBoard(){
 	$('#btnLoad').prop('disabled', true);
 	timerRunning = false;
 	clearInterval(interval1);
-	alert("You WON!");
+	// alert("You WON!");
+	$("#exampleModal").modal('show')
 	// console.log("You Won");
 
 	recordWin();
@@ -575,7 +580,6 @@ async function findPuzzleByDate(){
 
 	const loader = $loading.show();
 	try {
-
 		const v = await axios.post(
 			"/fetchapi",
 			{
@@ -614,13 +618,6 @@ async function findPuzzleByDate(){
 		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
 
-		let zoom = ((boardWidth - 16)/w)/1.8;
-		zoom = Math.min(zoom, 30);
-		boardZoom.value = zoom.toFixed(1);
-
-		$('#nurikabe').css('--col_count', w);
-
-
 		Object.entries(g).forEach(([k,v]) => {
 			const x = parseInt(k/w);
 			const y = k%w;
@@ -633,6 +630,15 @@ async function findPuzzleByDate(){
 			}
 		});
 		board.value = ogboard;
+
+		let zoom = ((boardWidth - 16)/w)/1.8;
+		zoom = Math.min(zoom, 30);
+		zoom = parseFloat(zoom.toFixed(1))
+		minZoom.value = zoom;
+		maxZoom.value = zoom*2
+		await sleep(1);
+		boardZoom.value = zoom;
+		$('#nurikabe').css('--col_count', w);
 
 		timerval1.value=0;
 		timerRunning = false;
@@ -731,20 +737,12 @@ function randomFetch(){
 	let month;
 	let day;
 	let the_date;
-	let validDate;
 
 	maxYr = new Date().getFullYear();
 	year = Math.floor(Math.random() * (maxYr-minYr+1))+minYr;
 	month = (Math.floor(Math.random() * 12)+1).toString().padStart(2, '0');
 	day = (Math.floor(Math.random() * 2)+30).toString().padStart(2, '0');
 	the_date = new Date(`${year}/${month}/${day}`);
-
-	// year = the_date.getFullYear();
-	// month = (the_date.getMonth()+1).toString().padStart(2, '0');
-	// day = (the_date.getDay()+1).toString().padStart(2, '0');
-	// validDate = new Date(`${year}-${month}-${day}`);
-	// console.log(validDate.toISOString())
-	// validDate = the_date;
 
 	difficulty.value = difficulties[the_difficulty]
 	date.value = the_date
@@ -790,6 +788,16 @@ function unfocusPage(){
 	// console.log('Tab is now blurred');
 	clearInterval(interval1);
 }
+function scrollZoom(ev){
+	//
+	if(ev.deltaY>0 && minZoom.value < boardZoom.value){
+		boardZoom.value-=2;
+		boardZoom.value = Math.max(minZoom.value, boardZoom.value)
+	}else if(ev.deltaY<0 && boardZoom.value < maxZoom.value){
+		boardZoom.value+=2;
+		boardZoom.value = Math.min(boardZoom.value,maxZoom.value)
+	}
+}
 
 // ++++++PINCH
 
@@ -831,8 +839,8 @@ function pointermoveHandler(ev) {
 		if(prevDiff !== 100000){
 			// console.log(curDiff-prevDiff)
 			let newZoom = parseFloat(boardZoom.value) + ((curDiff-prevDiff)/8);
-			newZoom = Math.min(40, newZoom);
-			newZoom = Math.max(newZoom, 6);
+			newZoom = Math.min(newZoom, maxZoom.value);
+			newZoom = Math.max(minZoom.value, newZoom);
 			boardZoom.value = newZoom.toFixed(1);
 		}
 		// if (prevDiff > 0) {
@@ -889,18 +897,19 @@ function pointerupHandler(ev) {
 		prevCoord = [100000,100000];
 	}
 }
-function removeEvent(ev) {
-
-}
 
 // ------PINCH ACTION
 
 
+// import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 
 </script>
-
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
 <style lang='css' scoped>
-@import url('bootstrap/dist/css/bootstrap.css');
+@import url('bootstrap/dist/css/bootstrap.min.css');
+/* @import url('bootstrap-vue-next/dist/bootstrap-vue-next.css'); */
+/* @import url('bootstrap-vue/dist/bootstrap-vue.css'); */
 @import url('./board.css');
 
 </style>
@@ -914,6 +923,7 @@ function removeEvent(ev) {
 		@blur='unfocusPage()' @focus='focusPage()'
 		@keyup.ctrl.z.exact='undo()'
 		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
+		@wheel.keyup.ctrl.stop.prevent="scrollZoom($event)"
 	>
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
 			@click.exact='resetHighlighting()'
@@ -945,7 +955,6 @@ function removeEvent(ev) {
 					</ul>
 				</div>
 			</details>
-
 			<div id='wrap_gameactions' style="position: sticky; top: 0; margin-top: -1em;">
 				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
 					<summary>
@@ -983,7 +992,7 @@ function removeEvent(ev) {
 								<td>
 									Date
 									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
-										:dark="isDarkMode" week-start="0"
+										:dark="isDark" week-start="0"
 									></VueDatePicker>
 								</td>
 							</tr>
@@ -995,7 +1004,6 @@ function removeEvent(ev) {
 						</div>
 					</div>
 				</details>
-
 				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
 					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
 					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save board</button>
@@ -1010,30 +1018,7 @@ function removeEvent(ev) {
 						</div>
 					</div>
 				</div>
-				<input type="range" name="" id="" v-model='boardZoom' min="6" max='40' step=".1" style="width:100%;">
-				<!-- Modal -->
-				<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-					Launch demo modal
-				</button>
-				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-					<div class="modal-dialog modal-dialog-centered" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-							<div class="modal-body">
-								...
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-								<button type="button" class="btn btn-primary">Save changes</button>
-							</div>
-						</div>
-					</div>
-				</div> -->
+				<input type="range" name="" id="" v-model='boardZoom' :min="minZoom" :max='maxZoom' step=".1" style="width:100%;">
 			</div>
 			<div>
 				<div id="wrap_board">
@@ -1068,6 +1053,26 @@ function removeEvent(ev) {
 						</tbody>
 					</table>
 				</div> -->
+			</div>
+			<!-- Modal -->
+			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+				:data-bs-theme="isDark?'dark':'light'"
+			>
+				<div class="modal-dialog">
+					<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Congratulation</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						You Won!
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+					</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</AppLayout>
