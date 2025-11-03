@@ -40,7 +40,7 @@ jobs:
           cache: 'npm' # Caches npm dependencies to speed up subsequent runs
 
       - name: Install dependencies
-        run: npm ci # Use 'npm ci' for clean installs in CI environments
+        run: npm ci --legacy-peer-deps # Use 'npm ci' for clean installs in CI environments
 
       - name: Run build
         run: npm run build
