@@ -17,12 +17,6 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 
 import 'bootstrap';
-// import { BootstrapVue, IconsPlugin, BButton } from 'bootstrap-vue'
-
-// import {BButton, BModal} from 'bootstrap-vue-next'
-// Import Bootstrap and BootstrapVue CSS files (order is important)
-// import 'bootstrap/dist/css/bootstrap.css'
-// import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 
 /**
@@ -40,8 +34,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 	},
 ];
 const $loading = useLoading({});
-
-// const datePicker = ref();
 
 const props = defineProps({
 	user:Object,
@@ -128,9 +120,7 @@ onMounted(()=>{
 	if(initMonth.length<2) initMonth = '0'+initMonth;
 	if(initDay.length<2) initDay = '0'+initDay;
 	initDate = `${props.year||''}-${initMonth}-${initDay}T00:00:00${timezoneoffset}`
-	// console.log(initDate)
 	date.value = new Date(initDate);
-	// console.log(date.value)
 	if(date.value == 'Invalid Date'){
 		if(props.year == null){
 			date.value = new Date();
@@ -151,9 +141,7 @@ onMounted(()=>{
 	el.onpointerout = pointerupHandler;
 	el.onpointerleave = pointerupHandler;
 
-
 	findPuzzleByDate()
-
 })
 
 watch(board, (newBoard)=>{
@@ -206,13 +194,11 @@ function clearBoard(newBoard:any){
 				"wall_highlighted-bottom": false,
 				"island_highlighted": false,
 				'root_highlight':false,
-				hint: isNumber(newBoard[indexX][indexY])
+				"roothint": "",
+				hint: isNumber(column)
 			}
-			if(isNumber(newBoard[indexX][indexY])){
-				hints.push([indexX,indexY])
-			}
-
 			if(isNumber(column)){
+				hints.push([indexX,indexY])
 				totalClue+=parseInt(column);
 			}
 		});
@@ -235,10 +221,11 @@ async function setSquare(x:number, y:number, state=''){
 	clearTimeout(validateDelay);
 	clearHighlight();
 
-
 	if(isHighlighting){
 		isHighlighting = false;
-		return;
+		if(state.length==2){
+			return;
+		}
 	}
 	if(isNumber(value)) return;
 	if(!timerRunning){
@@ -276,6 +263,7 @@ function clearHighlight(){
 			element['wall_highlighted-bottom']=false;
 			element['island_highlighted']=false;
 			element['root_highlight']=false;
+			element['roothint']="";
 		});
 	});
 }
@@ -326,87 +314,104 @@ async function highlightWall(square:number[]) {
 }
 async function highlightIsland(square:number[], isIgnoreIsles = false) {
 	return new Promise(async (resolve)=>{
-		let queue = [square];
-		let qString:string[] = [];
-		const blankQueue:number[][] = [];
-		let remainder = parseFloat(board.value[square[0]][square[1]]);
-		let hintVal = remainder;
+		try{
+			let queue = [square];
+			let qString:string[] = [];
+			const blankQueue:number[][] = [];
+			let remainder = parseFloat(board.value[square[0]][square[1]]);
+			let hintVal = remainder;
 
-		//highlight the hint square and isle squares
-		for (let i = 0; i < queue.length; i++) {
-			const value = queue[i];
-			boardClass.value[value[0]][value[1]].visited = true;
-			boardClass.value[value[0]][value[1]]['island_highlighted'] = true;
-			Object.values(directions).forEach((coord:number[]) => {
-				if(boardClass.value[value[0]+coord[0]] == undefined) return; //edge
-				const neighboringSquare = boardClass.value[value[0]+coord[0]][value[1]+coord[1]];
+			//highlight the hint square and isle squares
+			for (let i = 0; i < queue.length; i++) {
+				const value = queue[i];
+				boardClass.value[value[0]][value[1]].visited = true;
+				boardClass.value[value[0]][value[1]].island_highlighted = true;
+				boardClass.value[value[0]][value[1]].roothint = square.toString();
 
-				const newCoord = [value[0]+coord[0],value[1]+coord[1]];
-				if(qString.includes(newCoord.toString())) return;
+				Object.values(directions).forEach((coord:number[]) => {
+					if(boardClass.value[value[0]+coord[0]] == undefined) return; //edge
+					const neighboringSquare = boardClass.value[value[0]+coord[0]][value[1]+coord[1]];
+					const newCoord = [value[0]+coord[0],value[1]+coord[1]];
 
-				if(neighboringSquare== undefined) return;
-				if(neighboringSquare.visited) return;
-				if(neighboringSquare.wall) return;
-				if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
+					if(qString.includes(newCoord.toString())) return;
+					if(neighboringSquare== undefined) return; //edge
 
-				if(board.value[value[0]+coord[0]][value[1]+coord[1]]== "  " || isIgnoreIsles){
-					boardClass.value[value[0]+coord[0]][value[1]+coord[1]].visited=true
-					blankQueue.push([value[0]+coord[0],value[1]+coord[1]])
-				}else{
-					queue.push(newCoord)
-					qString.push(newCoord.toString());
-				}
+					if(neighboringSquare.wall) return;
+					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
+						resolve(1);
+					}
+					if(neighboringSquare.visited) return;
+					if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
+
+					if(board.value[value[0]+coord[0]][value[1]+coord[1]]== "  " || isIgnoreIsles){
+						boardClass.value[value[0]+coord[0]][value[1]+coord[1]].visited=true
+						blankQueue.push([value[0]+coord[0],value[1]+coord[1]])
+					}else{
+						queue.push(newCoord)
+						qString.push(newCoord.toString());
+					}
+				});
+
+				remainder=remainder-1;
+				// if(isIgnoreIsles) break;
+				// if(remainder==0) break;
+			}
+
+			$(`#item-${square[0]}_${square[1]}`).css('--count', "'"+(hintVal-remainder)+"'")
+			boardClass.value[square[0]][square[1]].root_highlight = true;
+
+			if(remainder <= 0){
+				resolve(remainder);
+				return;
+			}
+
+			blankQueue.forEach((value) => {
+				value.push(remainder)
+				boardClass.value[value[0]][value[1]]['visited'] = false;
 			});
 
-			remainder=remainder-1;
-			// if(isIgnoreIsles) break;
-			// if(remainder==0) break;
+			queue = blankQueue;
+
+			let spaceCtr = 0;
+
+			//highlight blank squares
+			for (let i = 0; i < queue.length; i++) {
+				const value = queue[i];
+
+				if(boardClass.value[value[0]][value[1]].visited) continue;
+				if(!isValidBlank(value, isIgnoreIsles)) continue;
+
+				boardClass.value[value[0]][value[1]].visited = true;
+				boardClass.value[value[0]][value[1]]['island_highlighted'] = true;
+				boardClass.value[value[0]][value[1]].roothint = square.toString();
+
+				Object.values(directions).forEach((coord:number[]) => {
+					if(boardClass.value[value[0]+coord[0]] == undefined) return;
+					const neighboringSquare = boardClass.value[value[0]+coord[0]][value[1]+coord[1]];
+					const newCoord = [value[0]+coord[0],value[1]+coord[1]];
+					if(neighboringSquare== undefined) return;
+
+					if(neighboringSquare.wall) return;
+					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
+						throw 1;
+					}
+					if(neighboringSquare.visited) return;
+					if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
+
+
+					if(value[2]==1) return;
+					const r = value[2]-1
+
+					queue.push([value[0]+coord[0],value[1]+coord[1], r])
+				});
+				spaceCtr++
+			}
+			remainder-=spaceCtr;
+			resolve(remainder)
+
+		}catch(ex){
+			resolve(ex);
 		}
-
-		$(`#item-${square[0]}_${square[1]}`).css('--count', "'"+(hintVal-remainder)+"'")
-		boardClass.value[square[0]][square[1]].root_highlight = true;
-
-		if(remainder <= 0){
-			resolve(remainder);
-			return;
-		}
-
-		blankQueue.forEach((value) => {
-			value.push(remainder)
-			boardClass.value[value[0]][value[1]]['visited'] = false;
-		});
-
-		queue = blankQueue;
-
-		let spaceCtr = 0;
-		//highlight blank squares
-		for (let i = 0; i < queue.length; i++) {
-			const value = queue[i];
-
-			if(boardClass.value[value[0]][value[1]].visited) continue;
-			if(!isValidBlank(value, isIgnoreIsles)) continue;
-
-			boardClass.value[value[0]][value[1]].visited = true;
-			boardClass.value[value[0]][value[1]]['island_highlighted'] = true;
-
-			Object.values(directions).forEach((coord:number[]) => {
-				if(boardClass.value[value[0]+coord[0]] == undefined) return;
-
-				const neighboringSquare = boardClass.value[value[0]+coord[0]][value[1]+coord[1]];
-				if(neighboringSquare== undefined) return;
-				if(neighboringSquare.visited) return;
-				if(neighboringSquare.wall) return;
-				if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
-
-				if(value[2]==1) return;
-				const r = value[2]-1
-
-				queue.push([value[0]+coord[0],value[1]+coord[1], r])
-			});
-			spaceCtr++
-		}
-		remainder-=spaceCtr;
-		resolve(remainder)
 	})
 }
 function isNumber(value:any) {
@@ -480,9 +485,10 @@ async function validateBoard(){
 	// clearHighlight()
 	// console.log('checkHintsSatified')
 	result = await checkHintsSatified()
-	// clearHighlight()
+	clearHighlight()
 	// console.log(result)
 	if(! result) return
+
 
 	$("#gameboard").addClass('won');
 	$('#btnUndo').prop('disabled', true);
@@ -550,9 +556,7 @@ function checkHintsSatified(){
 		for (let index = 0; index < hints.length; index++) {
 			const element = hints[index];
 			ctr = await highlightIsland(element, true)
-			// console.log($(`#item-${element[0]}_${element[1]}`))
 
-			clearHighlight()
 			if(ctr==0) continue;
 
 			resolve(false);
@@ -653,7 +657,7 @@ async function findPuzzleByDate(){
 }
 
 function redo(){
-	// console.log('redo')
+	console.log('redo')
 	const cell:number[] = move_r.value.pop()??[];
 	if(cell.length==0) return;
 	move.value.push(cell);
@@ -843,34 +847,20 @@ function pointermoveHandler(ev) {
 			newZoom = Math.max(minZoom.value, newZoom);
 			boardZoom.value = newZoom.toFixed(1);
 		}
-		// if (prevDiff > 0) {
-		//   if (curDiff > prevDiff) {
-		//     // The distance between the two pointers has increased
-		//     ev.target.style.background = "pink";
-		//   }
-		//   if (curDiff < prevDiff) {
-		//     // The distance between the two pointers has decreased
-		//     ev.target.style.background = "lightblue";
-		//   }
-		// }
 
 		// Cache the distance for the next move event
 		prevDiff = curDiff;
 	}
 	else if(evCache.length === 1){
-		// console.log('asdf');
 		let xCoord = evCache[0].clientX;
 		let yCoord = evCache[0].clientY;
 		if(prevCoord[0] !== 100000){
 			let xDiff = xCoord - prevCoord[0];
 			let yDiff = yCoord - prevCoord[1];
-			// console.log(xDiff, yDiff)
 
 			const boardWrapper = document.getElementById('wrap_board');
 			window.scrollBy({top: -yDiff})
 			boardWrapper?.scrollBy({left: -xDiff})
-
-
 		}
 		prevCoord[0] = xCoord;
 		prevCoord[1] = yCoord;
@@ -924,7 +914,8 @@ function pointerupHandler(ev) {
 		@keyup.ctrl.z.exact='undo()'
 		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 		@wheel.keyup.ctrl.stop.prevent="scrollZoom($event)"
-	>
+		>
+		<!-- style="max-width: calc(100vw + 300px);" -->
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
 			@click.exact='resetHighlighting()'
 			ref="loadingContainer"
@@ -1029,7 +1020,7 @@ function pointerupHandler(ev) {
 								@contextmenu="highlightEntity(x,y)"
 								:class='boardClass[x][y]'
 								:id="'item-'+x+'_'+y"
-							>
+								>
 								{{ board[x][y] }}
 							</td>
 						</tr>
@@ -1049,6 +1040,18 @@ function pointerupHandler(ev) {
 								<td>{{move.length -1 - x}}</td>
 								<td>{{move[move.length -1 - x][0]}}</td>
 								<td>{{move[move.length -1 - x][1]}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div> -->
+				<!-- <div style="display: inline-block; width: 150px; vertical-align: top; padding:.5em;">
+					<table id="tbl_moves">
+						<tbody style="max-height:300px;">
+							<tr v-for='(_,x) in boardClass.length' :key='x' class=''>
+								<td v-for='(_, y) in boardClass[x].length' :key='y' class='square'
+								>
+									{{ boardClass[x][y].roothint }}
+								</td>
 							</tr>
 						</tbody>
 					</table>

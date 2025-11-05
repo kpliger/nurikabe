@@ -1,6 +1,7 @@
 #nurikabe{
 	--sqr_size:31px;
 	--col_count: 6;
+
 }
 .btn {
 	margin: 0 .25em;
@@ -79,7 +80,7 @@ details ul{
 	}
 }
 table#gameboard {
-	border:5px solid;
+	border:5px solid gray;
 	// display: inline-block;
 	margin: .5em auto;
 	position: relative;
@@ -120,7 +121,7 @@ table#gameboard {
 	padding-bottom: 2em;
 	padding-left: 1em;
 	padding-right: 1em;
-	max-width: calc(100vh - 1em);
+	// max-width: calc(100vw - 1em);
 }
 #fullboardchange{
 	margin: auto;
@@ -133,22 +134,6 @@ table#gameboard {
 	/* CSS rules for dark mode */
 	#api_difficulty{
 		color:white;
-		background-color: black;
-	}
-}
-#blanket{
-	position: absolute;
-	top:0;
-	right:0;
-	bottom:0;
-	left:0;
-	background-color:white;
-	opacity: .5;
-	display:flex;
-	align-items: center;
-	justify-content: center;
-
-	@media (prefers-color-scheme: dark) {
 		background-color: black;
 	}
 }

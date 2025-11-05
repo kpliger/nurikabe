@@ -87,7 +87,7 @@ details ul li::marker {
 }
 
 table#gameboard {
-  border: 5px solid;
+  border: 5px solid gray;
   margin: 0.5em auto;
   position: relative;
   width: calc(var(--sqr_size) * var(--col_count) * 1.7);
@@ -122,7 +122,6 @@ table#gameboard {
   padding-bottom: 2em;
   padding-left: 1em;
   padding-right: 1em;
-  max-width: calc(100vh - 1em);
 }
 
 #fullboardchange {
@@ -141,24 +140,6 @@ table#gameboard {
     background-color: black;
   }
 }
-#blanket {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: white;
-  opacity: 0.5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-@media (prefers-color-scheme: dark) {
-  #blanket {
-    background-color: black;
-  }
-}
-
 #tbl_moves {
   border: 3px solid;
 }
