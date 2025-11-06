@@ -141,8 +141,7 @@ onMounted(()=>{
 	el.onpointerout = pointerupHandler;
 	el.onpointerleave = pointerupHandler;
 
-	window.onresize = resizeWindow;
-	resizeWindow()
+	$('main').css('overflow', 'auto')
 
 	findPuzzleByDate()
 })
@@ -807,11 +806,6 @@ function scrollZoom(ev){
 		boardZoom.value+=2;
 		boardZoom.value = Math.min(boardZoom.value,maxZoom.value)
 	}
-}
-async function resizeWindow(ev){
-	console.log('asdf')
-	$('#nurikabe').css('width', '1px');
-	$('#nurikabe').css('width', $('main').css('width'));
 }
 
 // ++++++UTIL

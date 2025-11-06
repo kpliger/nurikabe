@@ -19,31 +19,31 @@ const mainNavItems: NavItem[] = [
         href: '/board',
         icon: LayoutGrid,
     },
-    {
-        title: 'Leaderboard',
-        href: '/leaderboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'User',
-        href: '/user/1',
-        icon: LayoutGrid,
-    },
+    // {
+    //     title: 'Leaderboard',
+    //     href: '/leaderboard',
+    //     icon: LayoutGrid,
+    // },
+    // {
+    //     title: 'User',
+    //     href: '/user/1',
+    //     icon: LayoutGrid,
+    // },
     {
         title: 'History',
         href: '/history',
         icon: LayoutGrid,
     },
-    {
-        title: 'Tictactoe',
-        href: '/tictactoe',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Explanation',
-        href: '/explanation',
-        icon: LayoutGrid,
-    },
+    // {
+    //     title: 'Tictactoe',
+    //     href: '/tictactoe',
+    //     icon: LayoutGrid,
+    // },
+    // {
+    //     title: 'Explanation',
+    //     href: '/explanation',
+    //     icon: LayoutGrid,
+    // },
 ];
 
 const footerNavItems: NavItem[] = [
