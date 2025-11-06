@@ -120,8 +120,6 @@ table#gameboard {
   min-height: calc(100vh - 210px);
   touch-action: none; /* Prevent default touch behavior */
   padding-bottom: 2em;
-  padding-left: 1em;
-  padding-right: 1em;
 }
 
 #fullboardchange {

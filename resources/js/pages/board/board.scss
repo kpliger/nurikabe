@@ -1,7 +1,6 @@
 #nurikabe{
 	--sqr_size:31px;
 	--col_count: 6;
-
 }
 .btn {
 	margin: 0 .25em;
@@ -116,12 +115,8 @@ table#gameboard {
 	// height: calc(100vh - 170px);
 	// width: calc(100% - 150px);
 	min-height: calc(100vh - 210px);
-	// display: inline-block;
 	touch-action: none; /* Prevent default touch behavior */
 	padding-bottom: 2em;
-	padding-left: 1em;
-	padding-right: 1em;
-	// max-width: calc(100vw - 1em);
 }
 #fullboardchange{
 	margin: auto;

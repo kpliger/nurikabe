@@ -141,6 +141,9 @@ onMounted(()=>{
 	el.onpointerout = pointerupHandler;
 	el.onpointerleave = pointerupHandler;
 
+	window.onresize = resizeWindow;
+	resizeWindow()
+
 	findPuzzleByDate()
 })
 
@@ -152,6 +155,8 @@ watch(board, (newBoard)=>{
 	$('#btnRedo').prop('disabled', false);
 	$('#btnSave').prop('disabled', false);
 	$('#btnLoad').prop('disabled', false);
+	$('#rangeZoom').prop('disabled', false);
+	boardZoom.value = minZoom.value;
 
 	clearBoard(newBoard)
 
@@ -171,9 +176,13 @@ clearBoard(board.value)
 
 function saveBoard(){
     localStorage.setItem('board', JSON.stringify(board.value??[[' ']]));
+    localStorage.setItem('move', JSON.stringify(move.value??[[' ']]));
+
 }
 function loadBoard(){
 	board.value = JSON.parse(localStorage.getItem('board')??"[[ ]]");
+	move.value = JSON.parse(localStorage.getItem('move')??"[[ ]]");
+	move_r.value = [];
 }
 
 function clearBoard(newBoard:any){
@@ -232,7 +241,6 @@ async function setSquare(x:number, y:number, state=''){
 		timerRunning = true;
 		interval1 = setInterval(()=>{timerval1.value++}, 1000);
 	}
-
 
 	event.preventDefault();
 	if(state=='down'){
@@ -315,15 +323,17 @@ async function highlightWall(square:number[]) {
 async function highlightIsland(square:number[], isIgnoreIsles = false) {
 	return new Promise(async (resolve)=>{
 		try{
-			let queue = [square];
-			let qString:string[] = [];
+			let queue = [square.toString()];
 			const blankQueue:number[][] = [];
 			let remainder = parseFloat(board.value[square[0]][square[1]]);
 			let hintVal = remainder;
 
 			//highlight the hint square and isle squares
 			for (let i = 0; i < queue.length; i++) {
-				const value = queue[i];
+				const value = queue[i].split(',');
+				value[0] = parseInt(value[0]);
+				value[1] = parseInt(value[1]);
+
 				boardClass.value[value[0]][value[1]].visited = true;
 				boardClass.value[value[0]][value[1]].island_highlighted = true;
 				boardClass.value[value[0]][value[1]].roothint = square.toString();
@@ -333,12 +343,12 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 					const neighboringSquare = boardClass.value[value[0]+coord[0]][value[1]+coord[1]];
 					const newCoord = [value[0]+coord[0],value[1]+coord[1]];
 
-					if(qString.includes(newCoord.toString())) return;
+					if(queue.includes(newCoord.toString())) return;
 					if(neighboringSquare== undefined) return; //edge
 
 					if(neighboringSquare.wall) return;
 					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
-						resolve(1);
+						throw 1;
 					}
 					if(neighboringSquare.visited) return;
 					if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
@@ -347,8 +357,7 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 						boardClass.value[value[0]+coord[0]][value[1]+coord[1]].visited=true
 						blankQueue.push([value[0]+coord[0],value[1]+coord[1]])
 					}else{
-						queue.push(newCoord)
-						qString.push(newCoord.toString());
+						queue.push(newCoord.toString());
 					}
 				});
 
@@ -413,9 +422,6 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 			resolve(ex);
 		}
 	})
-}
-function isNumber(value:any) {
-	return !isNaN(parseFloat(value)) && isFinite(value);
 }
 function isValidBlank(value:number[], isIgnoreIsles = false){
 	let response = true;
@@ -495,6 +501,9 @@ async function validateBoard(){
 	$('#btnRedo').prop('disabled', true);
 	$('#btnSave').prop('disabled', true);
 	$('#btnLoad').prop('disabled', true);
+	$('#rangeZoom').prop('disabled', true);
+	boardZoom.value = minZoom.value;
+
 	timerRunning = false;
 	clearInterval(interval1);
 	// alert("You WON!");
@@ -565,9 +574,7 @@ function checkHintsSatified(){
 		resolve(ctr==0)
 	})
 }
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 function getTimezoneOffset():string{
 	let offset = (new Date).getTimezoneOffset();
 	let sign = offset<0?'+':'-';
@@ -621,6 +628,11 @@ async function findPuzzleByDate(){
 		// console.log(boardScale.toFixed(2))
 		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
+		let zoom = ((boardWidth - 16)/w)/1.8;
+		zoom = Math.min(zoom, 30);
+		zoom = parseFloat(zoom.toFixed(1))
+		minZoom.value = zoom;
+		$('#nurikabe').css('--col_count', w);
 
 		Object.entries(g).forEach(([k,v]) => {
 			const x = parseInt(k/w);
@@ -635,14 +647,8 @@ async function findPuzzleByDate(){
 		});
 		board.value = ogboard;
 
-		let zoom = ((boardWidth - 16)/w)/1.8;
-		zoom = Math.min(zoom, 30);
-		zoom = parseFloat(zoom.toFixed(1))
-		minZoom.value = zoom;
-		maxZoom.value = zoom*2
-		await sleep(1);
-		boardZoom.value = zoom;
-		$('#nurikabe').css('--col_count', w);
+		// maxZoom.value = zoom*2
+		// boardZoom.value = zoom;
 
 		timerval1.value=0;
 		timerRunning = false;
@@ -657,7 +663,7 @@ async function findPuzzleByDate(){
 }
 
 function redo(){
-	console.log('redo')
+	// console.log('redo')
 	const cell:number[] = move_r.value.pop()??[];
 	if(cell.length==0) return;
 	move.value.push(cell);
@@ -779,7 +785,6 @@ async function recordWin(){
 	}
 
 }
-
 function focusPage(){
 	// Code to execute when the tab gains focus
 	// console.log('Tab is now focused');
@@ -793,7 +798,8 @@ function unfocusPage(){
 	clearInterval(interval1);
 }
 function scrollZoom(ev){
-	//
+	if($("#gameboard").hasClass('won')) return;
+
 	if(ev.deltaY>0 && minZoom.value < boardZoom.value){
 		boardZoom.value-=2;
 		boardZoom.value = Math.max(minZoom.value, boardZoom.value)
@@ -802,6 +808,21 @@ function scrollZoom(ev){
 		boardZoom.value = Math.min(boardZoom.value,maxZoom.value)
 	}
 }
+async function resizeWindow(ev){
+	console.log('asdf')
+	$('#nurikabe').css('width', '1px');
+	$('#nurikabe').css('width', $('main').css('width'));
+}
+
+// ++++++UTIL
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+function isNumber(value:any) {
+	return !isNaN(parseFloat(value)) && isFinite(value);
+}
+// ------UTIL
 
 // ++++++PINCH
 
@@ -837,6 +858,8 @@ function pointermoveHandler(ev) {
 
   	// If two pointers are down, check for pinch gestures
 	if (evCache.length === 2) {
+		if($("#gameboard").hasClass('won')) return;
+
 		// Calculate the distance between the two pointers
 		const curDiff = Math.sqrt(Math.pow(evCache[0].clientX - evCache[1].clientX,2)+Math.pow(evCache[0].clientY - evCache[1].clientY,2));
 
@@ -914,7 +937,7 @@ function pointerupHandler(ev) {
 		@keyup.ctrl.z.exact='undo()'
 		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 		@wheel.keyup.ctrl.stop.prevent="scrollZoom($event)"
-		>
+	>
 		<!-- style="max-width: calc(100vw + 300px);" -->
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
 			@click.exact='resetHighlighting()'
@@ -1009,7 +1032,7 @@ function pointerupHandler(ev) {
 						</div>
 					</div>
 				</div>
-				<input type="range" name="" id="" v-model='boardZoom' :min="minZoom" :max='maxZoom' step=".1" style="width:100%;">
+				<input type="range" name="" id="rangeZoom" v-model='boardZoom' :min="minZoom" :max='maxZoom' step=".1" disabled style="width:100%;" >
 			</div>
 			<div>
 				<div id="wrap_board">
