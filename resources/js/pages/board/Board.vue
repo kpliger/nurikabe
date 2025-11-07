@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { SharedData, type BreadcrumbItem, type User } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
-import {onMounted, ref, watch, toRaw, useTemplateRef} from 'vue';
+import {onMounted, ref, watch, toRaw, useTemplateRef, useId} from 'vue';
 import { useDark, useToggle } from '@vueuse/core'
 
 import "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"
@@ -34,6 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 	},
 ];
 const $loading = useLoading({});
+let scopeId:string = "";
 
 const props = defineProps({
 	user:Object,
@@ -144,6 +145,7 @@ onMounted(()=>{
 	$('main').css('overflow', 'auto')
 	$('main').css('height', 'calc(100vh - 1em)')
 
+	scopeId = Object.keys($("#ddlPuzzle").data()).find(elem => elem.includes('v-'));
 	findPuzzleByDate()
 })
 
@@ -658,6 +660,7 @@ async function findPuzzleByDate(){
 		alert(`API Error: Fetching board failed. `);
 	} finally {
 		// loading.value = false;
+		$('#newBoardModal').modal('hide');
 		loader.hide();
 	}
 }
@@ -808,6 +811,15 @@ function scrollZoom(ev){
 		boardZoom.value = Math.min(boardZoom.value,maxZoom.value)
 	}
 }
+function showNewBoard(ev){
+	$("#newBoardModal").modal('show');
+	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+}
+function showHelp(ev){
+	$("#helpModal").modal('show');
+	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+}
+
 
 // ++++++UTIL
 
@@ -911,14 +923,11 @@ function pointerupHandler(ev) {
 
 
 // import 'bootstrap/dist/css/bootstrap.min.css'
-// import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 
 </script>
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
 <style lang='css' scoped>
 @import url('bootstrap/dist/css/bootstrap.min.css');
-/* @import url('bootstrap-vue-next/dist/bootstrap-vue-next.css'); */
-/* @import url('bootstrap-vue/dist/bootstrap-vue.css'); */
 @import url('./board.css');
 
 </style>
@@ -948,25 +957,12 @@ function pointerupHandler(ev) {
 					echo "<option>$value</option>";
 				}?> -->
 			</select>
-			<details id='det_help'>
-				<summary>Help</summary>
-				<div class='det-content'>
-					<ul>
-						<li>Wall cells are full filled cell</li>
-						<li>Hint cells are cell with a number.</li>
-						<li>Island cells are cell with a dot.</li>
-						<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
-						<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
-						<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
-						<li>Ctrl+Z = Undo</li>
-						<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
-						<li>The first few walls are filled in.</li>
-
-					</ul>
-				</div>
-			</details>
-			<div id='wrap_gameactions' style="">
-				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
+			<div class="d-flex justify-between items-baseline">
+				<h4>{{ difficulty }}: {{ dateFilter }} </h4>
+				<button type="button" class="btn btn-outline-primary" @click="showHelp" style="font-size:1.5em">&#9432;</button>
+			</div>
+			<div id='wrap_gameactions'>
+				<!-- <details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
 					<summary>
 						API
 						&nbsp;&nbsp;&nbsp;<div class="pill-filter" id="filter_difficulty" v-if="!isOpenFilter">
@@ -977,47 +973,20 @@ function pointerupHandler(ev) {
 						</div>
 					</summary>
 					<div class='det-content'>
-						<table id='tbl_filter' style="width:100%;">
-							<tr>
-								<td>
-									Size <br>
-									<div class="wrap_option">
-										<label>
-											<input type="radio" name="" value='small' v-model="difficulty">
-											Small
-										</label>
-										<label>
-											<input type="radio" name="" value='medium'  v-model="difficulty">
-											Medium
-										</label>
-										<label>
-											<input type="radio" name="" value='large'  v-model="difficulty">
-											Large
-										</label>
-
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									Date
-									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
-										:dark="isDark" week-start="0"
-									></VueDatePicker>
-								</td>
-							</tr>
-						</table>
 						<hr>
 						<div>
 							<button type='button' class='btn btn-primary' @click='findPuzzleByDate()' >Submit</button>
 							<input type='button' value='Random' class='btn btn-primary' @click='randomFetch()' />
 						</div>
 					</div>
-				</details>
+				</details> -->
 				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
+					<button type="button" class='btn btn-primary' @click="showNewBoard">
+						New
+					</button>
 					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
-					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save board</button>
-					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load board</button>
+					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save</button>
+					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load</button>
 				</div>
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
@@ -1028,7 +997,7 @@ function pointerupHandler(ev) {
 						</div>
 					</div>
 				</div>
-				<input type="range" name="" id="rangeZoom" v-model='boardZoom' :min="minZoom" :max='maxZoom' step=".1" disabled style="width:100%;" >
+				<!-- <input type="range" name="" id="rangeZoom" v-model='boardZoom' :min="minZoom" :max='maxZoom' step=".1" disabled style="width:100%;" > -->
 			</div>
 			<div>
 				<div id="wrap_board">
@@ -1095,7 +1064,89 @@ function pointerupHandler(ev) {
 					</div>
 					</div>
 				</div>
-			</div>
+			</div><!-- end Modal-->
+			<!-- Modal -->
+			<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true"
+				:data-bs-theme="isDark?'dark':'light'"
+			>
+				<div class="modal-dialog">
+					<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="helpModalLabel">Help</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<ul>
+							<li>Wall cells are full filled cell</li>
+							<li>Hint cells are cell with a number.</li>
+							<li>Island cells are cell with a dot.</li>
+							<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
+							<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
+							<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
+							<li>Ctrl+Z = Undo</li>
+							<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
+							<li>The first few walls are filled in.</li>
+
+						</ul>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+					</div>
+					</div>
+				</div>
+			</div><!-- end Modal-->
+			<!-- Modal -->
+			<div class="modal fade" id="newBoardModal" tabindex="-1" aria-labelledby="newBoardModal" aria-hidden="true"
+				:data-bs-theme="isDark?'dark':'light'"
+			>
+				<div class="modal-dialog">
+					<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="newBoardModalLabel">New Board</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<table id='tbl_filter' style="width:100%;">
+							<tr>
+								<td>
+									Size <br>
+									<div class="wrap_option">
+										<label>
+											<input type="radio" name="" value='small' v-model="difficulty">
+											Small
+										</label>
+										<label>
+											<input type="radio" name="" value='medium'  v-model="difficulty">
+											Medium
+										</label>
+										<label>
+											<input type="radio" name="" value='large'  v-model="difficulty">
+											Large
+										</label>
+
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Date
+									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
+										:dark="isDark" week-start="0"
+									></VueDatePicker>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type='button' class='btn btn-primary' @click='findPuzzleByDate()' >Submit</button>
+						<input type='button' value='Random' class='btn btn-primary' @click='randomFetch()' />
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+					</div>
+					</div>
+				</div>
+			</div><!-- end Modal-->
 		</div>
 	</AppLayout>
 </template>

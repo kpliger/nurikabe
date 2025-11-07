@@ -8,10 +8,10 @@
   margin: 0 0.25em;
 }
 
-details ul {
+details ul, .modal ul {
   padding-left: 1em;
 }
-details ul li::marker {
+details ul li::marker, .modal ul li::marker {
   content: "●  ";
 }
 
@@ -87,7 +87,7 @@ details ul li::marker {
 }
 
 table#gameboard {
-  border: 5px solid gray;
+  border: 10px solid gray;
   margin: 0.5em auto;
   position: relative;
   width: calc(var(--sqr_size) * var(--col_count) * 1.7);
@@ -112,6 +112,12 @@ table#gameboard {
 #det_api > summary:hover,
 #det_help > summary:hover {
   background-color: rgba(0, 0, 180, 0.05);
+}
+
+.modal table td {
+  border-top: 1px solid lightgray;
+  border-bottom: 1px solid lightgray;
+  padding: 0.25em;
 }
 
 #wrap_board {
@@ -193,9 +199,11 @@ table#gameboard {
   background-color: white;
   padding-bottom: 0.5em;
   z-index: 1;
+  border-bottom: 1px solid black;
 }
 @media (prefers-color-scheme: dark) {
   #wrap_gameactions {
+    border-bottom: 1px solid white;
     background-color: black;
   }
 }/*# sourceMappingURL=board.css.map */

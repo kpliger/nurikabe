@@ -6,7 +6,7 @@
 	margin: 0 .25em;
 }
 
-details ul{
+details ul, .modal ul{
 	padding-left:1em;
 	li::marker{
 		content:"●  ";
@@ -79,7 +79,7 @@ details ul{
 	}
 }
 table#gameboard {
-	border:5px solid gray;
+	border:10px solid gray;
 	// display: inline-block;
 	margin: .5em auto;
 	position: relative;
@@ -109,6 +109,18 @@ table#gameboard {
 
 	}
 }
+.modal{
+	table{
+		td{
+			border-top: 1px solid lightgray;
+			border-bottom: 1px solid lightgray;
+			padding: 0.25em;
+		}
+	}
+}
+
+
+
 #wrap_board{
 	position: relative;
 	overflow: auto;
@@ -186,8 +198,10 @@ table#gameboard {
 	background-color:white;
 	padding-bottom: .5em;
 	z-index: 1;
+	border-bottom: 1px solid black;
 
 	@media (prefers-color-scheme: dark) {
+		border-bottom: 1px solid white;
 		background-color:black;
 	}
 }
