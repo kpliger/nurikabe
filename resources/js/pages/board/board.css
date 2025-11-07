@@ -189,6 +189,7 @@ table#gameboard {
 #wrap_gameactions {
   position: sticky;
   top: 0;
+  margin-top: -1em;
   background-color: white;
   padding-bottom: 0.5em;
   z-index: 1;

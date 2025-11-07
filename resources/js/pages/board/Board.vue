@@ -142,6 +142,7 @@ onMounted(()=>{
 	el.onpointerleave = pointerupHandler;
 
 	$('main').css('overflow', 'auto')
+	$('main').css('height', 'calc(100vh - 1em)')
 
 	findPuzzleByDate()
 })
@@ -963,7 +964,7 @@ function pointerupHandler(ev) {
 					</ul>
 				</div>
 			</details>
-			<div id='wrap_gameactions' style="position: sticky; top: 0; margin-top: -1em;">
+			<div id='wrap_gameactions' style="">
 				<details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
 					<summary>
 						API
