@@ -877,7 +877,8 @@ function pointermoveHandler(ev) {
 			let yDiff = yCoord - prevCoord[1];
 
 			const boardWrapper = document.getElementById('wrap_board');
-			window.scrollBy({top: -yDiff})
+			const mainWrapper = document.querySelector('main');
+			mainWrapper.scrollBy({top: -yDiff})
 			boardWrapper?.scrollBy({left: -xDiff})
 		}
 		prevCoord[0] = xCoord;
