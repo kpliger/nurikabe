@@ -2,7 +2,7 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { SharedData, type BreadcrumbItem, type User } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
 import {onMounted, ref, watch, toRaw, useTemplateRef, useId} from 'vue';
 import { useDark, useToggle } from '@vueuse/core'
@@ -579,12 +579,15 @@ function checkHintsSatified(){
 	})
 }
 
-function getTimezoneOffset():string{
-	let offset = (new Date).getTimezoneOffset();
-	let sign = offset<0?'+':'-';
-	let hour = ('0'+Math.abs(offset/60)).slice(-2);
-	let minute = ('0'+offset%60).slice(-2);
-	return `${sign}${hour}:${minute}`;
+function gotoNewPage(){
+	const newUrl = route('Board', [
+		difficulty.value,
+		date.value.getFullYear(),
+		date.value.getMonth()+1,
+		date.value.getDate(),
+	])
+	$('.modal').modal('hide')
+	router.visit(newUrl)
 }
 
 async function findPuzzleByDate(){
@@ -620,7 +623,8 @@ async function findPuzzleByDate(){
 
 		//change url without
 		const urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
-		history.pushState({size:difficulty.value, date:dateFilter.value},"", urlPath);
+		// history.pushState({size:difficulty.value, date:dateFilter.value},"", urlPath);
+		// router.push()
 
 
 		// update scale
@@ -762,7 +766,9 @@ function randomFetch(){
 	difficulty.value = difficulties[the_difficulty]
 	date.value = the_date
 
-	findPuzzleByDate()
+	gotoNewPage()
+
+	// findPuzzleByDate()
 }
 async function recordWin(){
 
@@ -834,6 +840,13 @@ function isNumber(value:any) {
 function ucfirst(str) {
 	if (!str) return str; // Handle empty or null strings
 	return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function getTimezoneOffset():string{
+	let offset = (new Date).getTimezoneOffset();
+	let sign = offset<0?'+':'-';
+	let hour = ('0'+Math.abs(offset/60)).slice(-2);
+	let minute = ('0'+offset%60).slice(-2);
+	return `${sign}${hour}:${minute}`;
 }
 // ------UTIL
 
@@ -956,6 +969,7 @@ function pointerupHandler(ev) {
 		@keyup.ctrl.z.exact='undo()'
 		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 		@wheel.keyup.ctrl.stop.prevent="scrollZoom($event)"
+		@keyup.shift.alt.r.exact="randomFetch"
 	>
 		<!-- style="max-width: calc(100vw + 300px);" -->
 		<div id='nurikabe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"
@@ -1151,7 +1165,7 @@ function pointerupHandler(ev) {
 						</table>
 					</div>
 					<div class="modal-footer">
-						<button type='button' class='btn btn-primary' @click='findPuzzleByDate()' >Submit</button>
+						<button type='button' class='btn btn-primary' @click='gotoNewPage()' >Submit</button>
 						<input type='button' value='Random' class='btn btn-primary' @click='randomFetch()' />
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->

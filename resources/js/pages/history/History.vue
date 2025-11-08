@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+
 // import bootstrap?
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
 import Button from '@/components/ui/button/Button.vue';
@@ -92,7 +93,7 @@ function formatGameTime(time){
 								{{ formatGameTime(history.win_second) }}
 							</td>
 							<td class="px-6 py-4">
-								<a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+								<a :href="route('Board', [history.difficulty,...history.game_date.split('-')])" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
 							</td>
 						</tr>
 
