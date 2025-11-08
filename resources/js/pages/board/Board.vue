@@ -139,7 +139,7 @@ onMounted(()=>{
 	// the semantics for these events - in this app - are the same.
 	el.onpointerup = pointerupHandler;
 	el.onpointercancel = pointerupHandler;
-	el.onpointerout = pointerupHandler;
+	// el.onpointerout = pointerupHandler; kpl(2025-11-07): commented because it's firing too much
 	el.onpointerleave = pointerupHandler;
 
 	$('main').css('overflow', 'auto')
@@ -619,8 +619,8 @@ async function findPuzzleByDate(){
 		ogboard =[[]]
 
 		//change url without
-		let urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
-		window.history.pushState({},"", urlPath);
+		const urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
+		history.pushState({size:difficulty.value, date:dateFilter.value},"", urlPath);
 
 
 		// update scale
@@ -894,10 +894,10 @@ function pointermoveHandler(ev) {
 			let xDiff = xCoord - prevCoord[0];
 			let yDiff = yCoord - prevCoord[1];
 
+			//make less sensitive
+			const moveDiff = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
 			if(prevCoord[2]){
-				const moveDiff = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
-				if(moveDiff<2) return;
-				console.log(moveDiff)
+				if(moveDiff<20) return;
 				prevCoord[2] = false;
 			}
 
@@ -929,6 +929,7 @@ function pointerupHandler(ev) {
 	}
 	if (evCache.length < 1) {
 		prevCoord = [100000,100000, true];
+		// console.log('boo', ev.type)
 	}
 }
 
