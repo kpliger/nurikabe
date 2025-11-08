@@ -79,11 +79,10 @@ details ul, .modal ul{
 	}
 }
 table#gameboard {
-	border:10px solid gray;
-	// display: inline-block;
+	border:5px solid gray;
 	margin: .5em auto;
 	position: relative;
-	// width:100%;
+	table-layout: fixed;
 	width:calc(var(--sqr_size)*var(--col_count)*1.7);
 }
 
@@ -118,9 +117,6 @@ table#gameboard {
 		}
 	}
 }
-
-
-
 #wrap_board{
 	position: relative;
 	overflow: auto;

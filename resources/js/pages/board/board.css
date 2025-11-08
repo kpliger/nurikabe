@@ -87,9 +87,10 @@ details ul li::marker, .modal ul li::marker {
 }
 
 table#gameboard {
-  border: 10px solid gray;
+  border: 5px solid gray;
   margin: 0.5em auto;
   position: relative;
+  table-layout: fixed;
   width: calc(var(--sqr_size) * var(--col_count) * 1.7);
 }
 

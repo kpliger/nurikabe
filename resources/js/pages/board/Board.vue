@@ -146,6 +146,8 @@ onMounted(()=>{
 	$('main').css('height', 'calc(100vh - 1em)')
 
 	scopeId = Object.keys($("#ddlPuzzle").data()).find(elem => elem.includes('v-'));
+	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+
 	findPuzzleByDate()
 })
 
@@ -812,7 +814,7 @@ function scrollZoom(ev){
 	}
 }
 function showNewBoard(ev){
-	$("#newBoardModal").modal('show');
+	$("#newBoardModal").modal('show')
 	$('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
 function showHelp(ev){
@@ -829,6 +831,10 @@ function sleep(ms) {
 function isNumber(value:any) {
 	return !isNaN(parseFloat(value)) && isFinite(value);
 }
+function ucfirst(str) {
+	if (!str) return str; // Handle empty or null strings
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
 // ------UTIL
 
 // ++++++PINCH
@@ -836,7 +842,7 @@ function isNumber(value:any) {
 // Global vars to cache event state
 const evCache = [];
 let prevDiff = 100000;
-let prevCoord = [100000,100000];
+let prevCoord = [100000,100000, true];
 // Install event handlers for the pointer target
 let el;
 
@@ -888,6 +894,13 @@ function pointermoveHandler(ev) {
 			let xDiff = xCoord - prevCoord[0];
 			let yDiff = yCoord - prevCoord[1];
 
+			if(prevCoord[2]){
+				const moveDiff = Math.sqrt(Math.pow(xDiff,2) + Math.pow(yDiff,2));
+				if(moveDiff<2) return;
+				console.log(moveDiff)
+				prevCoord[2] = false;
+			}
+
 			const boardWrapper = document.getElementById('wrap_board');
 			const mainWrapper = document.querySelector('main');
 			mainWrapper.scrollBy({top: -yDiff})
@@ -915,7 +928,7 @@ function pointerupHandler(ev) {
 		prevDiff = 100000;
 	}
 	if (evCache.length < 1) {
-		prevCoord = [100000,100000];
+		prevCoord = [100000,100000, true];
 	}
 }
 
@@ -958,7 +971,7 @@ function pointerupHandler(ev) {
 				}?> -->
 			</select>
 			<div class="d-flex justify-between items-baseline">
-				<h4>{{ difficulty }}: {{ dateFilter }} </h4>
+				<h4>{{ ucfirst(difficulty) }}: {{ dateFilter }} </h4>
 				<button type="button" class="btn btn-outline-primary" @click="showHelp" style="font-size:1.5em">&#9432;</button>
 			</div>
 			<div id='wrap_gameactions'>
@@ -981,12 +994,10 @@ function pointerupHandler(ev) {
 					</div>
 				</details> -->
 				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
-					<button type="button" class='btn btn-primary' @click="showNewBoard">
-						New
-					</button>
-					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>reset</button>
-					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>save</button>
-					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>load</button>
+					<button type="button" class='btn btn-primary' @click="showNewBoard">New</button>
+					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>Reset</button>
+					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>Save</button>
+					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>Load</button>
 				</div>
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
