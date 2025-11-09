@@ -81,8 +81,8 @@ const move_r:any = ref([]);// :number[][] = [];
 const difficulty = ref('');
 const date = ref();
 
+const newDifficulty = ref();
 const dateFilter = ref();
-const isOpenFilter = ref(false);
 
 const gameTimer = ref("00:00");
 const timerval1 = ref(0);
@@ -112,6 +112,7 @@ onMounted(()=>{
 	difficulty.value = 'small';
 	if(['small', 'medium', 'large'].includes(props.size)){
 		difficulty.value = props.size;
+
 	}
 	const timezoneoffset = getTimezoneOffset();
 	let initMonth = props.month||'';
@@ -145,7 +146,7 @@ onMounted(()=>{
 	$('main').css('overflow', 'auto')
 	$('main').css('height', 'calc(100vh - 1em)')
 
-	scopeId = Object.keys($("#ddlPuzzle").data()).find(elem => elem.includes('v-'));
+	scopeId = Object.keys($("#nurikabe").data()).find(elem => elem.includes('v-'));
 	$('.modal-backdrop').attr(`data-${scopeId}`,"")
 
 	findPuzzleByDate()
@@ -581,7 +582,7 @@ function checkHintsSatified(){
 
 function gotoNewPage(){
 	const newUrl = route('Board', [
-		difficulty.value,
+		newDifficulty.value,
 		date.value.getFullYear(),
 		date.value.getMonth()+1,
 		date.value.getDate(),
@@ -595,6 +596,7 @@ async function findPuzzleByDate(){
 		(date.value.getMonth()+1)+"/"+
 		date.value.getDate();
 	dateFilter.value = slashDate;
+	newDifficulty.value = difficulty.value;
 
 	const loader = $loading.show();
 	try {
@@ -610,8 +612,6 @@ async function findPuzzleByDate(){
 			throw "No record found";
 		}
 
-		isOpenFilter.value=false;
-
 		move.value = [];
 
 		const data = v.data.puzzleData;
@@ -621,20 +621,11 @@ async function findPuzzleByDate(){
 
 		ogboard =[[]]
 
-		//change url without
-		const urlPath = `/board/${difficulty.value}/${dateFilter.value}`;
-		// history.pushState({size:difficulty.value, date:dateFilter.value},"", urlPath);
-		// router.push()
-
 
 		// update scale
 		// const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
 		let boardWidth = $('#wrap_board').css('width'); // get board width
 		boardWidth = boardWidth.slice(0,-2); // remove the unit PX
-		// let boardWrapWidth = sqrSize * 1.7 * w;
-		// const boardScale = boardWidth/boardWrapWidth;
-		// console.log(boardScale.toFixed(2))
-		// $('#gameboard').css('transform', 'scale('+boardScale+')');
 
 		let zoom = ((boardWidth - 16)/w)/1.8;
 		zoom = Math.min(zoom, 30);
@@ -655,9 +646,6 @@ async function findPuzzleByDate(){
 		});
 		board.value = ogboard;
 
-		// maxZoom.value = zoom*2
-		// boardZoom.value = zoom;
-
 		timerval1.value=0;
 		timerRunning = false;
 		clearInterval(interval1);
@@ -665,7 +653,6 @@ async function findPuzzleByDate(){
 		console.log(err);
 		alert(`API Error: Fetching board failed. `);
 	} finally {
-		// loading.value = false;
 		$('#newBoardModal').modal('hide');
 		loader.hide();
 	}
@@ -757,13 +744,16 @@ function randomFetch(){
 	let day;
 	let the_date;
 
-	maxYr = new Date().getFullYear();
-	year = Math.floor(Math.random() * (maxYr-minYr+1))+minYr;
-	month = (Math.floor(Math.random() * 12)+1).toString().padStart(2, '0');
-	day = (Math.floor(Math.random() * 2)+30).toString().padStart(2, '0');
-	the_date = new Date(`${year}/${month}/${day}`);
+	do{
+		maxYr = new Date().getFullYear();
+		year = Math.floor(Math.random() * (maxYr-minYr+1))+minYr;
+		month = (Math.floor(Math.random() * 12)+1).toString().padStart(2, '0');
+		day = (Math.floor(Math.random() * 2)+30).toString().padStart(2, '0');
+		the_date = new Date(`${year}/${month}/${day}`);
 
-	difficulty.value = difficulties[the_difficulty]
+	}while(the_date.getTime() > Date.now())
+
+	newDifficulty.value = difficulties[the_difficulty]
 	date.value = the_date
 
 	gotoNewPage()
@@ -792,7 +782,6 @@ async function recordWin(){
 	} catch (err) {
 		console.log(err);
 	} finally {
-		// loading.value = false;
 	}
 
 }
@@ -990,24 +979,6 @@ function pointerupHandler(ev) {
 				<button type="button" class="btn btn-outline-primary" @click="showHelp" style="font-size:1.5em">&#9432;</button>
 			</div>
 			<div id='wrap_gameactions'>
-				<!-- <details id='det_api' :open='isOpenFilter' @toggle="isOpenFilter = $event.target.open;">
-					<summary>
-						API
-						&nbsp;&nbsp;&nbsp;<div class="pill-filter" id="filter_difficulty" v-if="!isOpenFilter">
-							Size: {{ difficulty }}
-						</div>
-						<div class="pill-filter" id="filter_date" v-if="!isOpenFilter">
-							Date: {{ dateFilter }}
-						</div>
-					</summary>
-					<div class='det-content'>
-						<hr>
-						<div>
-							<button type='button' class='btn btn-primary' @click='findPuzzleByDate()' >Submit</button>
-							<input type='button' value='Random' class='btn btn-primary' @click='randomFetch()' />
-						</div>
-					</div>
-				</details> -->
 				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
 					<button type="button" class='btn btn-primary' @click="showNewBoard">New</button>
 					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>Reset</button>
@@ -1139,15 +1110,15 @@ function pointerupHandler(ev) {
 									Size <br>
 									<div class="wrap_option">
 										<label>
-											<input type="radio" name="" value='small' v-model="difficulty">
+											<input type="radio" name="" value='small' v-model="newDifficulty">
 											Small
 										</label>
 										<label>
-											<input type="radio" name="" value='medium'  v-model="difficulty">
+											<input type="radio" name="" value='medium'  v-model="newDifficulty">
 											Medium
 										</label>
 										<label>
-											<input type="radio" name="" value='large'  v-model="difficulty">
+											<input type="radio" name="" value='large'  v-model="newDifficulty">
 											Large
 										</label>
 
