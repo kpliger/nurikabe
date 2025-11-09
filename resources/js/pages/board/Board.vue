@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { SharedData, type BreadcrumbItem, type User } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
-import {onMounted, ref, watch, toRaw, useTemplateRef, useId} from 'vue';
+import {onMounted, ref, watch, toRaw, useTemplateRef, useId, onUnmounted} from 'vue';
 import { useDark, useToggle } from '@vueuse/core'
 
 import "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"
@@ -104,6 +104,7 @@ const boardClass:any = ref([]);
 const boardZoom = ref(30);
 const maxZoom = ref(40);
 const minZoom = ref(6);
+const newPageLoader = ref();
 
 const isDark = useDark()
 // const toggleDark = useToggle(isDark)
@@ -150,6 +151,10 @@ onMounted(()=>{
 	$('.modal-backdrop').attr(`data-${scopeId}`,"")
 
 	findPuzzleByDate()
+})
+onUnmounted(()=>{
+	if(newPageLoader.value === undefined) return
+	newPageLoader.value.hide()
 })
 
 watch(board, (newBoard)=>{
@@ -588,6 +593,7 @@ function gotoNewPage(){
 		date.value.getDate(),
 	])
 	$('.modal').modal('hide')
+	newPageLoader.value = $loading.show()
 	router.visit(newUrl)
 }
 
