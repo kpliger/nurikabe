@@ -110,6 +110,13 @@ const newPageLoader = ref();
 const isDark = useDark()
 // const toggleDark = useToggle(isDark)
 
+
+$(document).on('show.bs.modal', '.modal', async (event) =>{
+	// console.log('adf')
+	await sleep(1)
+	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+})
+
 onMounted(()=>{
 	difficulty.value = 'small';
 	if(['small', 'medium', 'large'].includes(props.size)){
@@ -149,7 +156,8 @@ onMounted(()=>{
 	$('main').css('height', 'calc(100vh - 1em)')
 
 	scopeId = Object.keys($("#nurikabe").data()).find(elem => elem.includes('v-'));
-	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
+	$('.modal-backdrop').remove()
 
 	findPuzzleByDate()
 })
@@ -831,12 +839,12 @@ function scrollZoom(ev){
 	}
 }
 function showNewBoard(ev){
-	$("#newBoardModal").modal('show')
-	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+	$("#newBoardModal").modal('show');
+	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
 function showHelp(ev){
 	$("#helpModal").modal('show');
-	$('.modal-backdrop').attr(`data-${scopeId}`,"")
+	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
 
 
