@@ -193,7 +193,7 @@ watch(boardZoom, (val)=>{
 
 		if(!zoomed){
 			zoomed = true;
-			$('#wrap_board').get(0).scrollBy({left:55})
+			$('#wrap_board').get(0).scrollBy({left:50})
 		}
 	}
 })
@@ -906,9 +906,6 @@ function pointermoveHandler(ev) {
 			newZoom = Math.min(newZoom, maxZoom.value);
 			newZoom = Math.max(minZoom.value, newZoom);
 			boardZoom.value = newZoom.toFixed(1);
-
-			$('#wrap_board').get(0).scrollBy({left:(curDiff-prevDiff)})
-
 		}
 
 		// Cache the distance for the next move event
