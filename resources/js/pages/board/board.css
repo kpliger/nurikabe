@@ -94,6 +94,10 @@ table#gameboard {
   width: calc(var(--sqr_size) * var(--col_count) * 1.7);
 }
 
+table#gameboard.zoomed {
+  margin: 0.5em 50px;
+}
+
 #det_api,
 #det_help {
   border: 3px solid rgb(63, 146, 242);
@@ -126,7 +130,7 @@ table#gameboard {
   overflow: auto;
   min-height: calc(100vh - 210px);
   touch-action: none; /* Prevent default touch behavior */
-  padding-bottom: 2em;
+  padding-bottom: 10em;
 }
 
 #fullboardchange {

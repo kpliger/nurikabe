@@ -35,6 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 const $loading = useLoading({});
 let scopeId:string = "";
+let zoomed = false;
 
 const props = defineProps({
 	user:Object,
@@ -180,6 +181,21 @@ watch(boardZoom, (val)=>{
 	// console.log(val);
 	// $('#gameboard').css('transform', 'scale('+val+')');
 	$('#nurikabe').css('--sqr_size', val+'px');
+
+	const boardWrap = $('#wrap_board').css('width').slice(0,-2);
+	const gameboard = $('#gameboard').css('width').slice(0,-2);
+
+	if(gameboard<=boardWrap){
+		$('#gameboard').removeClass('zoomed')
+		zoomed = false;
+	}else{
+		$('#gameboard').addClass('zoomed')
+
+		if(!zoomed){
+			zoomed = true;
+			$('#wrap_board').get(0).scrollBy({left:55})
+		}
+	}
 })
 
 clearBoard(board.value)
@@ -890,6 +906,9 @@ function pointermoveHandler(ev) {
 			newZoom = Math.min(newZoom, maxZoom.value);
 			newZoom = Math.max(minZoom.value, newZoom);
 			boardZoom.value = newZoom.toFixed(1);
+
+			$('#wrap_board').get(0).scrollBy({left:(curDiff-prevDiff)})
+
 		}
 
 		// Cache the distance for the next move event

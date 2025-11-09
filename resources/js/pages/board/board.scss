@@ -85,6 +85,9 @@ table#gameboard {
 	table-layout: fixed;
 	width:calc(var(--sqr_size)*var(--col_count)*1.7);
 }
+table#gameboard.zoomed{
+	margin: .5em 50px;
+}
 
 #det_api,
 #det_help {
@@ -124,7 +127,14 @@ table#gameboard {
 	// width: calc(100% - 150px);
 	min-height: calc(100vh - 210px);
 	touch-action: none; /* Prevent default touch behavior */
-	padding-bottom: 2em;
+	padding-bottom: 10em;
+	// padding-left:10em;
+	// padding-right:10em;
+	// margin-left: -5em;
+
+	// display: flex;
+	// justify-content: center;
+
 }
 #fullboardchange{
 	margin: auto;
