@@ -14,9 +14,18 @@ class HistoryController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		return Inertia::render("history/History", [
-			"history"=> $request->user()->history()->orderBy('id', 'desc')->paginate(10),
+		$sortField = $request->input('sort', 'id');
+		$sortDirection = $request->input('direction', 'desc');
 
+		$histories = $request->user()->history()
+			->orderBy($sortField, $sortDirection)
+			->paginate(10)
+			->withQueryString();
+
+		return Inertia::render("history/History", [
+			"history"=> $histories,
+			"sort"=> $sortField,
+			"direction"=> $sortDirection,
 		]);
 	}
 

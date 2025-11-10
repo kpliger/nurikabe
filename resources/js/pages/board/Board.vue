@@ -62,6 +62,12 @@ const inverseDirections:object = {
 	"right": 'left',
 	"bottom":'top',
 }
+const CORNERS = {
+	"tl":[-1,-1],
+	"tr":[-1, 1],
+	"bl":[ 1,-1],
+	"br":[ 1, 1],
+}
 let isHighlighting = false;
 let totalClue:number = 0;
 let boardSize:number = 0;
@@ -347,17 +353,19 @@ function highlightWall(square:number[]) {
 				boardClass.value[value[0]+coord[0]][value[1]+coord[1]]['wall_highlighted-'+inverseDirections[direction]]=false;
 				return;
 			}
+
+			// hightlight possible moves excluding corners
 			if(
 				board.value[value[0]+coord[0]][value[1]+coord[1]] == '  ' &&
 				!neighboringSquare.corner_checked
 			){
 				neighboringSquare.corner_checked = true;
-				console.log('checking ',value[0]+coord[0],' ',value[1]+coord[1])
 				if(!await isCorner(value[0]+coord[0],value[1]+coord[1])){
-					console.log('checked ',value[0]+coord[0],' ',value[1]+coord[1])
 					boardClass.value[value[0]+coord[0]][value[1]+coord[1]].island_highlighted = true;
 				}
 			}
+
+
 			if(!neighboringSquare.wall) return;
 
 			queue.push([value[0]+coord[0],value[1]+coord[1]])
@@ -621,22 +629,15 @@ function checkHintsSatified(){
 function isCorner(x:number,y:number){
 	return new Promise(async (resolve)=>{
 		try{
-			const corners = {
-				"tl":[-1,-1],
-				"tr":[-1, 1],
-				"bl":[ 1,-1],
-				"br":[ 1, 1],
-			}
-			Object.entries(directions)
-			Object.entries(corners).forEach(([name, coord]) => {
+			Object.entries(CORNERS).forEach(([name, coord]) => {
 				if(board.value[x+coord[0]] == undefined) return;
-
 				const corner = board.value[x+coord[0]][y+coord[1]]
 				if(corner !=' ■') return;
 				const horizontal = board.value[x][y+coord[1]]
 				if(horizontal!=' ■') return;
 				const vertical = board.value[x+coord[0]][y]
 				if(vertical!=' ■') return;
+
 				throw true;
 			});
 			resolve(false)
@@ -645,11 +646,6 @@ function isCorner(x:number,y:number){
 		}
 	})
 }
-async function checkIsCorner(x:number,y:number){
-	console.log(await isCorner(x,y));
-}
-
-
 function gotoNewPage(){
 	const newUrl = route('Board', [
 		newDifficulty.value,
@@ -691,7 +687,6 @@ async function findPuzzleByDate(){
 		const g = data.data.startingGrid;
 
 		ogboard =[[]]
-
 
 		// update scale
 		// const sqrSize = $('#nurikabe').css('--sqr_size').slice(0,-2);;
@@ -1058,7 +1053,7 @@ function pointerupHandler(ev) {
 				</div>
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
-						<div style='font-family: monospace; font-size: 1.5em; opacity: .6em;'>{{gameTimer}}</div>
+						<div style='font-family: monospace; font-size: 1.5em; opacity: .6;'>{{gameTimer}}</div>
 						<div>
 							<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
 							<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 
 // import bootstrap?
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
@@ -26,11 +26,31 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps({
 	history:Object,
+	sort:String,
+	direction: String
 })
 
 // const histories = toRaw(props.history);
 const histories = props.history;
 // console.log(toRaw(histories));
+
+function handleSort(field:string){
+	const newDirection = props.sort === field && props.direction === 'asc'?'desc':'asc';
+	router.get('history', {
+		// search,
+		sort: field,
+		direction: newDirection
+	},{
+		// preserveState: true,
+		// replace: true
+	})
+}
+
+function renderSortArror(field){
+	if(props.sort !==field) return null;
+	return props.direction === 'asc'?"▲":"▼";
+}
+
 
 function formatGameTime(time){
 	let second =  String(time%60).padStart(2,'0');
@@ -61,11 +81,13 @@ function formatGameTime(time){
 									<label for="checkbox-all-search" class="sr-only">checkbox</label>
 								</div>
 							</th>
-							<th scope="col" class="px-6 py-3">
+							<th scope="col" class="px-6 py-3 cursor-pointer" @click="handleSort('game_date')">
 								Date
+								{{ renderSortArror('game_date') }}
 							</th>
-							<th scope="col" class="px-6 py-3">
+							<th scope="col" class="px-6 py-3 cursor-pointer" @click="handleSort('difficulty')">
 								Difficulty
+								{{ renderSortArror('difficulty') }}
 							</th>
 							<th scope="col" class="px-6 py-3">
 								Time (mm:ss)
@@ -93,7 +115,7 @@ function formatGameTime(time){
 								{{ formatGameTime(history.win_second) }}
 							</td>
 							<td class="px-6 py-4">
-								<a :href="route('Board', [history.difficulty,...history.game_date.split('-')])" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+								<Link :href="route('Board', [history.difficulty,...history.game_date.split('-')])" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</Link>
 							</td>
 						</tr>
 
@@ -115,12 +137,12 @@ function formatGameTime(time){
 						<template v-for='link in histories.links'>
 							<template v-if='link.url==null && link.label!="..."'></template>
 							<li v-else-if='link.active' class='paginator-link'>
-								<a :href="link.url" aria-current="page" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-								><span v-html='link.label'></span></a>
+								<Link :href="link.url" aria-current="page" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+								><span v-html='link.label'></span></Link>
 							</li>
 							<li v-else class='paginator-link'>
-								<a :href="link.url" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-								><span v-html='link.label'></span></a>
+								<Link :href="link.url" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+								><span v-html='link.label'></span></Link>
 							</li>
 						</template>
 						<!-- <li>
