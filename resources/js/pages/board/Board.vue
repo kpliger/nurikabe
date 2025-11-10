@@ -173,7 +173,7 @@ watch(board, (newBoard)=>{
 	$('#btnUndo').prop('disabled', false);
 	$('#btnRedo').prop('disabled', false);
 	$('#btnSave').prop('disabled', false);
-	$('#btnLoad').prop('disabled', false);
+	// $('#btnLoad').prop('disabled', false);
 	$('#rangeZoom').prop('disabled', false);
 	boardZoom.value = minZoom.value;
 
@@ -190,8 +190,8 @@ watch(boardZoom, (val)=>{
 	// $('#gameboard').css('transform', 'scale('+val+')');
 	$('#nurikabe').css('--sqr_size', val+'px');
 
-	const boardWrap = $('#wrap_board').css('width').slice(0,-2);
-	const gameboard = $('#gameboard').css('width').slice(0,-2);
+	const boardWrap:number = parseFloat($('#wrap_board').css('width').slice(0,-2));
+	const gameboard:number = parseFloat($('#gameboard').css('width').slice(0,-2));
 
 	if(gameboard<=boardWrap){
 		$('#gameboard').removeClass('zoomed')
@@ -211,9 +211,10 @@ clearBoard(board.value)
 function saveBoard(){
     localStorage.setItem('board', JSON.stringify(board.value??[[' ']]));
     localStorage.setItem('move', JSON.stringify(move.value??[[' ']]));
-
+	$("#btnLoad").prop('disabled', false)
 }
 function loadBoard(){
+
 	board.value = JSON.parse(localStorage.getItem('board')??"[[ ]]");
 	move.value = JSON.parse(localStorage.getItem('move')??"[[ ]]");
 	move_r.value = [];
@@ -237,6 +238,7 @@ function clearBoard(newBoard:any){
 				"wall_highlighted-bottom": false,
 				"island_highlighted": false,
 				'root_highlight':false,
+				"corner_checked":false,
 				"roothint": "",
 				hint: isNumber(column)
 			}
@@ -305,6 +307,7 @@ function clearHighlight(){
 			element['wall_highlighted-bottom']=false;
 			element['island_highlighted']=false;
 			element['root_highlight']=false;
+			element['corner_checked']=false;
 			element['roothint']="";
 		});
 	});
@@ -324,7 +327,7 @@ async function highlightEntity(x:number,y:number){
 	}
 
 }
-async function highlightWall(square:number[]) {
+function highlightWall(square:number[]) {
 	const queue = [square];
 
 	for (let i = 0; i < queue.length; i++) {
@@ -333,7 +336,7 @@ async function highlightWall(square:number[]) {
 		boardClass.value[value[0]][value[1]].visited = true;
 		let neighboringSquare = [];
 
-		Object.entries(directions).forEach(([direction,coord]) => {
+		Object.entries(directions).forEach(async([direction,coord]) => {
 			boardClass.value[value[0]][value[1]]['wall_highlighted-'+direction] = true;
 			if(boardClass.value[value[0]+coord[0]] == undefined) return;
 
@@ -344,9 +347,16 @@ async function highlightWall(square:number[]) {
 				boardClass.value[value[0]+coord[0]][value[1]+coord[1]]['wall_highlighted-'+inverseDirections[direction]]=false;
 				return;
 			}
-			if(board.value[value[0]+coord[0]][value[1]+coord[1]] == '  '){
-				neighboringSquare.island_highlighted = true;
-
+			if(
+				board.value[value[0]+coord[0]][value[1]+coord[1]] == '  ' &&
+				!neighboringSquare.corner_checked
+			){
+				neighboringSquare.corner_checked = true;
+				console.log('checking ',value[0]+coord[0],' ',value[1]+coord[1])
+				if(!await isCorner(value[0]+coord[0],value[1]+coord[1])){
+					console.log('checked ',value[0]+coord[0],' ',value[1]+coord[1])
+					boardClass.value[value[0]+coord[0]][value[1]+coord[1]].island_highlighted = true;
+				}
 			}
 			if(!neighboringSquare.wall) return;
 
@@ -608,6 +618,37 @@ function checkHintsSatified(){
 		resolve(ctr==0)
 	})
 }
+function isCorner(x:number,y:number){
+	return new Promise(async (resolve)=>{
+		try{
+			const corners = {
+				"tl":[-1,-1],
+				"tr":[-1, 1],
+				"bl":[ 1,-1],
+				"br":[ 1, 1],
+			}
+			Object.entries(directions)
+			Object.entries(corners).forEach(([name, coord]) => {
+				if(board.value[x+coord[0]] == undefined) return;
+
+				const corner = board.value[x+coord[0]][y+coord[1]]
+				if(corner !=' ■') return;
+				const horizontal = board.value[x][y+coord[1]]
+				if(horizontal!=' ■') return;
+				const vertical = board.value[x+coord[0]][y]
+				if(vertical!=' ■') return;
+				throw true;
+			});
+			resolve(false)
+		}catch(ex){
+			resolve(ex)
+		}
+	})
+}
+async function checkIsCorner(x:number,y:number){
+	console.log(await isCorner(x,y));
+}
+
 
 function gotoNewPage(){
 	const newUrl = route('Board', [
@@ -1017,7 +1058,7 @@ function pointerupHandler(ev) {
 				</div>
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
-						<div style='font-family: monospace; font-size: 1.5em;'>{{gameTimer}}</div>
+						<div style='font-family: monospace; font-size: 1.5em; opacity: .6em;'>{{gameTimer}}</div>
 						<div>
 							<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
 							<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>
@@ -1035,7 +1076,8 @@ function pointerupHandler(ev) {
 								@contextmenu="highlightEntity(x,y)"
 								:class='boardClass[x][y]'
 								:id="'item-'+x+'_'+y"
-								>
+								:title="x+','+y"
+							>
 								{{ board[x][y] }}
 							</td>
 						</tr>
