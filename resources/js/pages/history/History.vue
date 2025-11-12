@@ -47,7 +47,7 @@ function handleSort(field:string){
 }
 
 function renderSortArror(field){
-	if(props.sort !==field) return null;
+	if(props.sort !==field) return "<span style='font-size:.7em; display:inline-block; line-height:.9em;'>▲<br>▼<span>";
 	return props.direction === 'asc'?"▲":"▼";
 }
 
@@ -83,11 +83,11 @@ function formatGameTime(time){
 							</th>
 							<th scope="col" class="px-6 py-3 cursor-pointer" @click="handleSort('game_date')">
 								Date
-								{{ renderSortArror('game_date') }}
+								<span v-html="renderSortArror('game_date')" ></span>
 							</th>
 							<th scope="col" class="px-6 py-3 cursor-pointer" @click="handleSort('difficulty')">
 								Difficulty
-								{{ renderSortArror('difficulty') }}
+								<span v-html="renderSortArror('difficulty')" ></span>
 							</th>
 							<th scope="col" class="px-6 py-3">
 								Time (mm:ss)
@@ -115,7 +115,7 @@ function formatGameTime(time){
 								{{ formatGameTime(history.win_second) }}
 							</td>
 							<td class="px-6 py-4">
-								<Link :href="route('Board', [history.difficulty,...history.game_date.split('-')])" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</Link>
+								<Link :href="route('Board', [history.difficulty,...history.game_date.split('-')])" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Replay</Link>
 							</td>
 						</tr>
 

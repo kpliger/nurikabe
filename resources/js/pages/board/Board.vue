@@ -116,6 +116,9 @@ const newPageLoader = ref();
 const isDark = useDark()
 // const toggleDark = useToggle(isDark)
 
+const minDate = new Date("2005/01/01").getTime();
+const maxDate = Date.now();
+
 
 $(document).on('show.bs.modal', '.modal', async (event) =>{
 	// console.log('adf')
@@ -139,13 +142,19 @@ onMounted(()=>{
 	initDate = `${props.year||''}-${initMonth}-${initDay}T00:00:00${timezoneoffset}`
 	date.value = new Date(initDate);
 	if(date.value == 'Invalid Date'){
-		if(props.year == null){
-			date.value = new Date();
+		if(props.day!==null){
+			router.get(`/board/${difficulty.value}`)
+			return;
 		}else{
-			alert('Invalid date. ');
-			return
+			date.value = new Date();
 		}
+
+	}else if(date.value.getTime()<minDate || date.value.getTime()>maxDate){
+		router.get(`/board/${difficulty.value}`)
+		return;
 	}
+
+
 
 	el = document.getElementById("wrap_board");
 	el.onpointerdown = pointerdownHandler;
@@ -1202,6 +1211,8 @@ function pointerupHandler(ev) {
 									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
 										class="justify-center"
 										:dark="isDark" week-start="0"
+										:min-date="new Date('2005/01/01')"
+										:max-date="new Date()"
 									></VueDatePicker>
 								</td>
 							</tr>
