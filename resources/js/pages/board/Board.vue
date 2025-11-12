@@ -45,8 +45,8 @@ const props = defineProps({
 	day: String,
 })
 // const curUser = toRaw(prompt.user);
-// const page = usePage<SharedData>();
-// const user = page.props.auth.user as User;
+const page = usePage<SharedData>();
+const user = page.props.auth.user as User;
 // const curUser = toRaw(user);
 // console.log(curUser);
 
@@ -562,6 +562,8 @@ async function validateBoard(){
 	$("#exampleModal").modal('show')
 	// console.log("You Won");
 
+	// don't record if no user login
+	if(user === null) return;
 	recordWin();
 }
 
@@ -1175,20 +1177,22 @@ function pointerupHandler(ev) {
 							<tr>
 								<td>
 									Size <br>
-									<div class="wrap_option">
-										<label>
-											<input type="radio" name="" value='small' v-model="newDifficulty">
-											Small
-										</label>
-										<label>
-											<input type="radio" name="" value='medium'  v-model="newDifficulty">
-											Medium
-										</label>
-										<label>
-											<input type="radio" name="" value='large'  v-model="newDifficulty">
-											Large
-										</label>
+									<div class="flex">
+										<div class="wrap_option ml-auto mr-auto">
+											<label>
+												<input type="radio" name="" value='small' v-model="newDifficulty">
+												Small
+											</label>
+											<label>
+												<input type="radio" name="" value='medium'  v-model="newDifficulty">
+												Medium
+											</label>
+											<label>
+												<input type="radio" name="" value='large'  v-model="newDifficulty">
+												Large
+											</label>
 
+										</div>
 									</div>
 								</td>
 							</tr>
@@ -1196,6 +1200,7 @@ function pointerupHandler(ev) {
 								<td>
 									Date
 									<VueDatePicker id='api_date' v-model="date" inline auto-apply :enable-time-picker="false"
+										class="justify-center"
 										:dark="isDark" week-start="0"
 									></VueDatePicker>
 								</td>
