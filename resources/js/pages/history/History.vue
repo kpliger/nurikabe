@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, Link } from '@inertiajs/vue3';
+import { Head, router, Link, useForm} from '@inertiajs/vue3';
 
 // import bootstrap?
 import PlaceholderPattern from '../../components/PlaceholderPattern.vue';
@@ -9,6 +9,7 @@ import Button from '@/components/ui/button/Button.vue';
 import { computed, onMounted, ref, toRaw, watch } from 'vue';
 // import "./tictactoe.css"
 
+import Input from '@/components/ui/input/Input.vue';
 
 // const script = document.createElement('script');
 //   script.type = 'module';
@@ -26,6 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps({
 	history:Object,
+	search:String,
 	sort:String,
 	direction: String
 })
@@ -34,10 +36,14 @@ const props = defineProps({
 const histories = props.history;
 // console.log(toRaw(histories));
 
+const filter = useForm({
+	search:props.search
+})
+
 function handleSort(field:string){
 	const newDirection = props.sort === field && props.direction === 'asc'?'desc':'asc';
 	router.get('history', {
-		// search,
+		search: props.search,
 		sort: field,
 		direction: newDirection
 	},{
@@ -50,8 +56,6 @@ function renderSortArror(field){
 	if(props.sort !==field) return "<span style='font-size:.7em; display:inline-block; line-height:.9em;'>▲<br>▼<span>";
 	return props.direction === 'asc'?"▲":"▼";
 }
-
-
 function formatGameTime(time){
 	let second =  String(time%60).padStart(2,'0');
 	let minute =  String(parseInt(time/60)).padStart(2,'0');
@@ -71,6 +75,11 @@ function formatGameTime(time){
 		<div id='tictactoe' class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
 			Record of games that the user completed.
 
+			<form  @submit.prevent="filter.get('/history')" class="flex" style="max-width: 300px;margin-left:auto;">
+				<Input type="text" name="search" id="" placeholder="Search date" v-model="filter.search"/>
+				&nbsp;
+				<Button type="submit" class="btn btn-success" :disabled="filter.processing">GO</Button>
+			</form>
 			<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
 				<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

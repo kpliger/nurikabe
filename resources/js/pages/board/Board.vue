@@ -121,7 +121,6 @@ const maxDate = Date.now();
 
 
 $(document).on('show.bs.modal', '.modal', async (event) =>{
-	// console.log('adf')
 	await sleep(1)
 	$('.modal-backdrop').attr(`data-${scopeId}`,"")
 })
@@ -190,7 +189,6 @@ watch(board, (newBoard)=>{
 	$('#btnSave').prop('disabled', false);
 	// $('#btnLoad').prop('disabled', false);
 	$('#rangeZoom').prop('disabled', false);
-	boardZoom.value = minZoom.value;
 
 	clearBoard(newBoard)
 
@@ -229,7 +227,6 @@ function saveBoard(){
 	$("#btnLoad").prop('disabled', false)
 }
 function loadBoard(){
-
 	board.value = JSON.parse(localStorage.getItem('board')??"[[ ]]");
 	move.value = JSON.parse(localStorage.getItem('move')??"[[ ]]");
 	move_r.value = [];
@@ -515,6 +512,7 @@ function reset(){
 	board.value = [...ogboard];
 	move.value = [];
 
+	$('#btnLoad').prop('disabled', true);
 	boardZoom.value = minZoom.value;
 	timerval1.value=0;
 	timerRunning = false;
@@ -722,6 +720,7 @@ async function findPuzzleByDate(){
 			}
 		});
 		board.value = ogboard;
+		boardZoom.value = minZoom.value;
 
 		timerval1.value=0;
 		timerRunning = false;

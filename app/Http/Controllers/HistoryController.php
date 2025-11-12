@@ -14,16 +14,19 @@ class HistoryController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		$search = $request->input('search');
 		$sortField = $request->input('sort', 'id');
 		$sortDirection = $request->input('direction', 'desc');
 
 		$histories = $request->user()->history()
+			->where('game_date', 'like', '%'.$search.'%')
 			->orderBy($sortField, $sortDirection)
 			->paginate(10)
 			->withQueryString();
 
 		return Inertia::render("history/History", [
 			"history"=> $histories,
+			"search"=>$search,
 			"sort"=> $sortField,
 			"direction"=> $sortDirection,
 		]);
