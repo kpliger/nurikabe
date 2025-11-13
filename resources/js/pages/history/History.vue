@@ -53,7 +53,7 @@ function handleSort(field:string){
 }
 
 function renderSortArror(field){
-	if(props.sort !==field) return "<span style='font-size:.7em; display:inline-block; line-height:.9em;'>▲<br>▼<span>";
+	if(props.sort !==field) return "<span style='font-size:.7em; display:inline-block; line-height:.8em;'>▲<br>▼<span>";
 	return props.direction === 'asc'?"▲":"▼";
 }
 function formatGameTime(time){

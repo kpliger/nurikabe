@@ -118,7 +118,7 @@ const isDark = useDark()
 
 const minDate = new Date("2005/01/01").getTime();
 const maxDate = Date.now();
-
+const difficulties = ref(['small', 'medium', 'large', 'mixed']);
 
 $(document).on('show.bs.modal', '.modal', async (event) =>{
 	await sleep(1)
@@ -127,7 +127,7 @@ $(document).on('show.bs.modal', '.modal', async (event) =>{
 
 onMounted(()=>{
 	difficulty.value = 'small';
-	if(['small', 'medium', 'large'].includes(props.size)){
+	if(difficulties.value.includes(props.size)){
 		difficulty.value = props.size;
 
 	}
@@ -153,8 +153,6 @@ onMounted(()=>{
 		return;
 	}
 
-
-
 	el = document.getElementById("wrap_board");
 	el.onpointerdown = pointerdownHandler;
 	el.onpointermove = pointermoveHandler;
@@ -170,7 +168,7 @@ onMounted(()=>{
 	$('main').css('height', 'calc(100vh - 1em)')
 
 	scopeId = Object.keys($("#nurikabe").data()).find(elem => elem.includes('v-'));
-	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
+
 	$('.modal-backdrop').remove()
 
 	findPuzzleByDate()
@@ -283,6 +281,7 @@ async function setSquare(x:number, y:number, state=''){
 		if(state.length==2){
 			return;
 		}
+		return
 	}
 	if(isNumber(value)) return;
 	if(!timerRunning){
@@ -729,7 +728,7 @@ async function findPuzzleByDate(){
 		console.log(err);
 		alert(`API Error: Fetching board failed. `);
 	} finally {
-		$('#newBoardModal').modal('hide');
+		// $('#newBoardModal').modal('hide');
 		loader.hide();
 	}
 }
@@ -812,7 +811,6 @@ function randomFetch(){
 	let minYr = 2005;
 
 	let the_difficulty = Math.floor(Math.random() * 3);
-	let difficulties = ['small', 'medium', 'large'];
 
 	let maxYr;
 	let year;
@@ -829,7 +827,7 @@ function randomFetch(){
 
 	}while(the_date.getTime() > Date.now())
 
-	newDifficulty.value = difficulties[the_difficulty]
+	newDifficulty.value = difficulties.value[the_difficulty]
 	date.value = the_date
 
 	gotoNewPage()
@@ -889,7 +887,7 @@ function showNewBoard(ev){
 	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
 function showHelp(ev){
-	$("#helpModal").modal('show');
+	$("#helpModal").modal('show', {});
 	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
 
@@ -1187,19 +1185,11 @@ function pointerupHandler(ev) {
 									Size <br>
 									<div class="flex">
 										<div class="wrap_option ml-auto mr-auto">
-											<label>
-												<input type="radio" name="" value='small' v-model="newDifficulty">
-												Small
+											<label v-for="(difficulty) in difficulties">
+												<input type="radio" name="" :value="difficulty" v-model="newDifficulty">
+												{{ ucfirst(difficulty) }}
+												  <!-- adsfadsf -->
 											</label>
-											<label>
-												<input type="radio" name="" value='medium'  v-model="newDifficulty">
-												Medium
-											</label>
-											<label>
-												<input type="radio" name="" value='large'  v-model="newDifficulty">
-												Large
-											</label>
-
 										</div>
 									</div>
 								</td>
