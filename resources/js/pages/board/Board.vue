@@ -810,7 +810,7 @@ function randomFetch(){
 	// 2005 to present
 	let minYr = 2005;
 
-	let the_difficulty = Math.floor(Math.random() * 3);
+	let the_difficulty = Math.floor(Math.random() * difficulties.value.length);
 
 	let maxYr;
 	let year;
