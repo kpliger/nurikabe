@@ -510,6 +510,7 @@ function reset(){
 	});
 	board.value = [...ogboard];
 	move.value = [];
+	move_r.value = [];
 
 	$('#btnLoad').prop('disabled', true);
 	boardZoom.value = minZoom.value;
@@ -862,14 +863,19 @@ async function recordWin(){
 function focusPage(){
 	// Code to execute when the tab gains focus
 	// console.log('Tab is now focused');
-	if(timerRunning){
+
+	const tagName = document.activeElement
+	if(timerRunning && interval1 === null){
 		interval1 = setInterval(()=>{timerval1.value++}, 1000);
 	}
 }
-function unfocusPage(){
+function unfocusPage(event){
 	// Code to execute when the tab loses focus
 	// console.log('Tab is now blurred');
+	const tagName = document.activeElement.tagName
+	if(tagName === "BODY" ) return; // dont stop clock if focused element is part of the newPageLoader
 	clearInterval(interval1);
+	interval1 = null
 }
 function scrollZoom(ev){
 	if($("#gameboard").hasClass('won')) return;
@@ -1028,7 +1034,7 @@ function pointerupHandler(ev) {
 
 	<AppLayout :breadcrumbs="breadcrumbs"
 		tabindex='0'
-		@blur='unfocusPage()' @focus='focusPage()'
+		@blur='unfocusPage' @focus='focusPage()'
 		@keyup.ctrl.z.exact='undo()'
 		@keyup.ctrl.shift.z.exact='redo()' @keyup.ctrl.y.exact='redo()'
 		@wheel.keyup.ctrl.stop.prevent="scrollZoom($event)"
