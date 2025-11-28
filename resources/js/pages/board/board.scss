@@ -24,7 +24,7 @@ details ul, .modal ul{
 	cursor: pointer;
 	position: relative;
 
-	&.hint.root_highlight::after {
+	&.root_highlight::after {
 		content: var(--count);
 		position: absolute;
 		/* top: -1em; */
@@ -84,6 +84,11 @@ table#gameboard {
 	position: relative;
 	table-layout: fixed;
 	width:calc(var(--sqr_size)*var(--col_count)*1.7);
+	background-color: rgb(237, 241, 251);
+
+	@media (prefers-color-scheme: dark) {
+		background-color: rgb(32, 35, 43);
+	}
 }
 table#gameboard.zoomed{
 	margin: .5em 50px;
@@ -210,4 +215,11 @@ table#gameboard.zoomed{
 		border-bottom: 1px solid white;
 		background-color:black;
 	}
+}
+#flag_pb{
+	font-size: .7em;
+	border:2px solid orange;
+	border-radius: 1em;
+	padding: 0.25em;
+	cursor: help;
 }

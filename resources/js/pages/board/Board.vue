@@ -166,12 +166,14 @@ onMounted(()=>{
 
 	$('main').css('overflow', 'auto')
 	$('main').css('height', 'calc(100vh - 1em)')
+	$('#btnNew').focus();
 
 	scopeId = Object.keys($("#nurikabe").data()).find(elem => elem.includes('v-'));
 
 	$('.modal-backdrop').remove()
 
-	findPuzzleByDate()
+	findPuzzleByDate();
+	getPersonalBest();
 })
 onUnmounted(()=>{
 	if(newPageLoader.value === undefined) return
@@ -278,11 +280,11 @@ async function setSquare(x:number, y:number, state=''){
 
 	if(isHighlighting){
 		isHighlighting = false;
-		if(state.length==2){
+		if(state.length===0){
 			return;
 		}
-		return
 	}
+
 	if(isNumber(value)) return;
 	if(!timerRunning){
 		timerRunning = true;
@@ -306,7 +308,7 @@ async function setSquare(x:number, y:number, state=''){
 	// console.log(move.value);
 
 	boardClass.value[x][y]['wall'] = board.value[x][y] == ' ■'
-	setTimeout(validateBoard, 10);
+	validateBoard();
 }
 function clearHighlight(){
 	boardClass.value.forEach((row:any) => {
@@ -333,7 +335,7 @@ async function highlightEntity(x:number,y:number){
 	if(boardClass.value[x][y]['wall']){
 		highlightWall([x,y])
 	}
-	if(isNumber(board.value[x][y])){
+	if(isNumber(board.value[x][y]) || board.value[x][y] == " ●"){
 		await highlightIsland([x,y])
 	}
 
@@ -382,8 +384,10 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 		try{
 			let queue = [square.toString()];
 			const blankQueue:number[][] = [];
-			let remainder = parseFloat(board.value[square[0]][square[1]]);
-			let hintVal = remainder;
+			let remainder = 0;
+			let hintVal;
+			let hintCells = [];
+
 
 			//highlight the hint square and isle squares
 			for (let i = 0; i < queue.length; i++) {
@@ -393,7 +397,11 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 
 				boardClass.value[value[0]][value[1]].visited = true;
 				boardClass.value[value[0]][value[1]].island_highlighted = true;
-				boardClass.value[value[0]][value[1]].roothint = square.toString();
+				// boardClass.value[value[0]][value[1]].roothint = square.toString();
+
+				if(isNumber( board.value[value[0]][value[1]] )){
+					hintCells.push(queue[i]);
+				}
 
 				Object.values(directions).forEach((coord:number[]) => {
 					if(boardClass.value[value[0]+coord[0]] == undefined) return; //edge
@@ -404,11 +412,10 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 					if(neighboringSquare== undefined) return; //edge
 
 					if(neighboringSquare.wall) return;
-					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
-						throw 1;
-					}
+					// if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
+					// 	throw 1;
+					// }
 					if(neighboringSquare.visited) return;
-					if(isNumber(board.value[value[0]+coord[0]][value[1]+coord[1]])) return;
 
 					if(board.value[value[0]+coord[0]][value[1]+coord[1]]== "  " || isIgnoreIsles){
 						boardClass.value[value[0]+coord[0]][value[1]+coord[1]].visited=true
@@ -418,18 +425,33 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 					}
 				});
 
-				remainder=remainder-1;
+				remainder++;
 				// if(isIgnoreIsles) break;
 				// if(remainder==0) break;
 			}
 
-			$(`#item-${square[0]}_${square[1]}`).css('--count', "'"+(hintVal-remainder)+"'")
+			$(`#item-${square[0]}_${square[1]}`).css('--count', "'"+(remainder)+"'")
 			boardClass.value[square[0]][square[1]].root_highlight = true;
+
+			if(hintCells.length!==1) throw 1;
+
+			let value = hintCells[0].split(',');
+			hintVal = board.value[value[0]][value[1]];
+			remainder = hintVal-remainder;
+
+			// assign island with hint
+			queue.map((v,k)=>{
+				let cellCoord = v.split(',');
+				boardClass.value[cellCoord[0]][cellCoord[1]].roothint = hintCells[0];
+			})
 
 			if(remainder <= 0){
 				resolve(remainder);
 				return;
 			}
+
+
+			// Highlight possible moves//
 
 			blankQueue.forEach((value) => {
 				value.push(remainder)
@@ -449,7 +471,7 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 
 				boardClass.value[value[0]][value[1]].visited = true;
 				boardClass.value[value[0]][value[1]]['island_highlighted'] = true;
-				boardClass.value[value[0]][value[1]].roothint = square.toString();
+				boardClass.value[value[0]][value[1]].roothint = hintCells[0];
 
 				Object.values(directions).forEach((coord:number[]) => {
 					if(boardClass.value[value[0]+coord[0]] == undefined) return;
@@ -458,7 +480,7 @@ async function highlightIsland(square:number[], isIgnoreIsles = false) {
 					if(neighboringSquare== undefined) return;
 
 					if(neighboringSquare.wall) return;
-					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== square.toString()){
+					if(neighboringSquare.roothint !== "" && neighboringSquare.roothint !== hintCells[0]){
 						throw 1;
 					}
 					if(neighboringSquare.visited) return;
@@ -733,6 +755,32 @@ async function findPuzzleByDate(){
 		loader.hide();
 	}
 }
+const pb = ref('');
+async function getPersonalBest(){
+	try {
+		let slashDate = date.value.getFullYear()+ '-'+
+			('0'+(date.value.getMonth()+1)).slice(-2)+ '-'+
+			('0'+date.value.getDate()).slice(-2)
+
+		const v = await axios.post(
+			"/history/getPersonalsBest",
+			{
+				difficulty: difficulty.value,
+				date: slashDate,
+			}
+		)
+		if(v.data.code > 0 || v.data.data === null || v.data.data.length===0){
+			throw "No Personal Best";
+		}
+		pb.value = formatGameTime(v.data.data.win_second);
+		// console.log(pb)
+
+	}catch(ex){
+		console.log(ex)
+	}finally{
+
+	}
+}
 
 function redo(){
 	// console.log('redo')
@@ -836,7 +884,6 @@ function randomFetch(){
 	// findPuzzleByDate()
 }
 async function recordWin(){
-
 	const winDate = date.value.getFullYear()+ '-'+
 		('0'+(date.value.getMonth()+1)).slice(-2)+ '-'+
 		('0'+date.value.getDate()).slice(-2)
@@ -896,7 +943,11 @@ function showHelp(ev){
 	$("#helpModal").modal('show', {});
 	// $('.modal-backdrop').attr(`data-${scopeId}`,"")
 }
-
+function formatGameTime(time){
+	let second =  String(time%60).padStart(2,'0');
+	let minute =  String(parseInt(time/60)).padStart(2,'0');
+	return minute+":"+second;
+}
 
 // ++++++UTIL
 
@@ -1045,29 +1096,23 @@ function pointerupHandler(ev) {
 			@click.exact='resetHighlighting()'
 			ref="loadingContainer"
 		>
-			<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">
-			<input type='button' value='Submit' class="btn btn-primary" onclick="$('#inputFile').change()"> -->
-			<select name='' id='ddlPuzzle' autocomplete="off" style='display: none;'>
-				<option value=''>Select item</option>
-				<!-- <?php foreach ($files1 as $key => $value) {
-					if (in_array($value,array(".",".."))) continue;
-					echo "<option>$value</option>";
-				}?> -->
-			</select>
 			<div class="d-flex justify-between items-baseline">
 				<h4>{{ ucfirst(difficulty) }}: {{ dateFilter }} </h4>
 				<button type="button" class="btn btn-outline-primary" @click="showHelp" style="font-size:1.5em">&#9432;</button>
 			</div>
 			<div id='wrap_gameactions'>
 				<div id='fullboardchange' style='margin: 1em auto; text-align: center;'>
-					<button type="button" class='btn btn-primary' @click="showNewBoard">New</button>
-					<button class='btn btn-success' @click='reset()'	 id="btnReset" disabled>Reset</button>
-					<button class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>Save</button>
-					<button class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>Load</button>
+					<button type="button" class='btn btn-primary' @click="showNewBoard" id='btnNew'>New</button>
+					<button type="button" class='btn btn-success' @click='reset()'	 id="btnReset" disabled>Reset</button>
+					<button type="button" class='btn btn-success' @click='saveBoard()' id="btnSave" disabled>Save</button>
+					<button type="button" class='btn btn-success' @click='loadBoard()' id="btnLoad" disabled>Load</button>
 				</div>
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
 						<div style='font-family: monospace; font-size: 1.5em; opacity: .6;'>{{gameTimer}}</div>
+						<div id="flag_pb" v-if="pb.length"  :title=pb>
+							PB
+						</div>
 						<div>
 							<input type='button' id="btnUndo" class="btn btn-primary" value="<<" title='Undo' @click="undo()" disabled>
 							<input type='button' id="btnRedo" class="btn btn-primary" value=">>" title='Redo' @click="redo()" disabled>
@@ -1129,17 +1174,17 @@ function pointerupHandler(ev) {
 			>
 				<div class="modal-dialog">
 					<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="exampleModalLabel">Congratulation</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						You Won!
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
-					</div>
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Congratulation</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							You Won!
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+						</div>
 					</div>
 				</div>
 			</div><!-- end Modal-->
@@ -1149,28 +1194,27 @@ function pointerupHandler(ev) {
 			>
 				<div class="modal-dialog">
 					<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="helpModalLabel">Help</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<ul>
-							<li>Wall cells are full filled cell</li>
-							<li>Hint cells are cell with a number.</li>
-							<li>Island cells are cell with a dot.</li>
-							<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
-							<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
-							<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
-							<li>Ctrl+Z = Undo</li>
-							<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
-							<li>The first few walls are filled in.</li>
-
-						</ul>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
-					</div>
+						<div class="modal-header">
+							<h5 class="modal-title" id="helpModalLabel">Help</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<ul>
+								<li>Wall cells are full filled cell</li>
+								<li>Hint cells are cell with a number.</li>
+								<li>Island cells are cell with a dot.</li>
+								<li>Click/tap a cell to fill a wall. Click/tap again to turn it to island. Click/tap again to return it to empty.</li>
+								<li>HINT cell + rightclick/longpress = show possible move and count island size. </li>
+								<li>WALL cell + rightclick/longpress = highlight contigous wall. </li>
+								<li>Ctrl+Z = Undo</li>
+								<li>Ctrl+Y or Ctrl+Shft+Z = Redo</li>
+								<li>The first few walls are filled in.</li>
+							</ul>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+						</div>
 					</div>
 				</div>
 			</div><!-- end Modal-->
@@ -1186,6 +1230,15 @@ function pointerupHandler(ev) {
 					</div>
 					<div class="modal-body">
 						<table id='tbl_filter' style="width:100%;">
+							<!-- <input type='file' id='inputFile' value="F:\Porfolio\Nurikabe Solver\puzzles\puzzle001.csv">
+							<input type='button' value='Submit' class="btn btn-primary" onclick="$('#inputFile').change()"> -->
+							<select name='' id='ddlPuzzle' autocomplete="off" style='display: none;'>
+								<option value=''>Select item</option>
+								<!-- <?php foreach ($files1 as $key => $value) {
+									if (in_array($value,array(".",".."))) continue;
+									echo "<option>$value</option>";
+								}?> -->
+							</select>
 							<tr>
 								<td>
 									Size <br>

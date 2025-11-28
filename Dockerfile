@@ -1,30 +1,47 @@
-FROM php:8.2-apache
-WORKDIR /var/www/html
+# USE the official PHP image as a base image
+FROM php:8.2-fpm
 
-# Mod Rewrite
-RUN a2enmod rewrite
+# Set working directory
+WORKDIR /var/www
 
-# Linux Library
-RUN apt-get update -y && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
     git \
     libicu-dev \
     libmariadb-dev \
     unzip zip \
-    zlib1g-dev \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev
+    libzip-dev \
+    locales \
+    jpegoptim optipng pngquant gifsicle \
+    vim \
+    curl \
+    libpq-dev \
+    libonig-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
 
-RUN chmod 777 -R /var/www/
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl
 
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# PHP Extension
-RUN docker-php-ext-install gettext intl pdo_mysql gd
+# Copy the existing application directory contents to the working directory
+COPY . /var/www
 
-RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd
+# Copy the existing application directory permissions to the working directory
+COPY --chown=www-data:www-data . /var/www
+
+# Change current user to www
+USER www-data
+
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]

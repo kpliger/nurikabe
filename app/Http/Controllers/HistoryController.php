@@ -97,4 +97,22 @@ class HistoryController extends Controller
 		];
 		return \json_encode($response);
 	}
+	public function getPersonalsBest(Request $request)
+	{
+		$pb = $request->user()->history()
+			->select(["win_second",])
+			->where([
+				["difficulty",$request->difficulty],
+				["game_date", $request->date],
+			])
+			->orderBy("win_second", "asc")
+			->first()
+		;
+
+		$response = [
+			'code'=>0,
+			'data'=> $pb,
+		];
+		return \json_encode($response);
+	}
 }

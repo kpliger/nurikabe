@@ -40,6 +40,7 @@ Route::get('board/{size?}/{year:year?}/{month:month?}/{day:day?}', [NurikabeApiC
 
 Route::post('fetchapi', [NurikabeApiController::class, 'getBoard']);
 Route::post('history/recordWin', [HistoryController::class, 'recordWin']);
+Route::post('history/getPersonalsBest', [HistoryController::class, 'getPersonalsBest']);
 
 
 
