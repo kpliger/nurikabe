@@ -16,7 +16,8 @@ import 'vue-loading-overlay/dist/css/index.css';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 
-import 'bootstrap';
+// import 'bootstrap';
+import {Tooltip} from 'bootstrap';
 
 
 /**
@@ -124,6 +125,13 @@ $(document).on('show.bs.modal', '.modal', async (event) =>{
 	await sleep(1)
 	$('.modal-backdrop').attr(`data-${scopeId}`,"")
 })
+$(document).on('show.bs.tooltip', '[data-bs-title]', async (event) =>{
+	await sleep(1)
+	$('.bs-tooltip-auto').attr('data-'+scopeId,"");
+	$('.bs-tooltip-auto').attr('data-bs-theme',isDark?"dark":"light");
+	$('.tooltip-arrow').attr('data-'+scopeId,"");
+	$('.tooltip-inner').attr('data-'+scopeId,"");
+})
 
 onMounted(()=>{
 	difficulty.value = 'small';
@@ -169,8 +177,15 @@ onMounted(()=>{
 	$('#btnNew').focus();
 
 	scopeId = Object.keys($("#nurikabe").data()).find(elem => elem.includes('v-'));
-
+	// console.log(scopeId)
 	$('.modal-backdrop').remove()
+
+	new Tooltip(document.body, {
+      selector: "[data-bs-toggle='tooltip']",
+    })
+	// $('#flag_pb').tooltip('show');
+	// $('#flag_pb').tooltip('hide');
+
 
 	findPuzzleByDate();
 	getPersonalBest();
@@ -308,7 +323,7 @@ async function setSquare(x:number, y:number, state=''){
 	// console.log(move.value);
 
 	boardClass.value[x][y]['wall'] = board.value[x][y] == ' ■'
-	validateBoard();
+	setTimeout(validateBoard,1);
 }
 function clearHighlight(){
 	boardClass.value.forEach((row:any) => {
@@ -758,6 +773,7 @@ async function findPuzzleByDate(){
 const pb = ref('');
 async function getPersonalBest(){
 	try {
+		$("#flag_pb").hide();
 		let slashDate = date.value.getFullYear()+ '-'+
 			('0'+(date.value.getMonth()+1)).slice(-2)+ '-'+
 			('0'+date.value.getDate()).slice(-2)
@@ -773,7 +789,7 @@ async function getPersonalBest(){
 			throw "No Personal Best";
 		}
 		pb.value = formatGameTime(v.data.data.win_second);
-		// console.log(pb)
+		$("#flag_pb").show();
 
 	}catch(ex){
 		console.log(ex)
@@ -1074,8 +1090,8 @@ function pointerupHandler(ev) {
 </script>
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
 <style lang='css' scoped>
-@import url('bootstrap/dist/css/bootstrap.min.css');
-@import url('./board.css');
+	@import url('bootstrap/dist/css/bootstrap.min.css');
+	@import url('./board.css');
 
 </style>
 
@@ -1110,7 +1126,7 @@ function pointerupHandler(ev) {
 				<div style="margin-bottom: .25em;">
 					<div style='width: 20em; display:flex; margin:auto; align-items: center; justify-content: space-around;'>
 						<div style='font-family: monospace; font-size: 1.5em; opacity: .6;'>{{gameTimer}}</div>
-						<div id="flag_pb" v-if="pb.length"  :title=pb>
+						<div id="flag_pb" data-bs-toggle="tooltip" :data-bs-theme="isDark?'dark':'light'" :data-bs-title=pb>
 							PB
 						</div>
 						<div>

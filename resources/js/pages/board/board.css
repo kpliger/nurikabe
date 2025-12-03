@@ -1,6 +1,6 @@
 @charset "UTF-8";
 #nurikabe {
-  --sqr_size:31px;
+  --sqr_size: 31px;
   --col_count: 6;
 }
 
@@ -8,10 +8,12 @@
   margin: 0 0.25em;
 }
 
-details ul, .modal ul {
+details ul,
+.modal ul {
   padding-left: 1em;
 }
-details ul li::marker, .modal ul li::marker {
+details ul li::marker,
+.modal ul li::marker {
   content: "●  ";
 }
 
@@ -222,7 +224,7 @@ table#gameboard.zoomed {
 #flag_pb {
   font-size: 0.7em;
   border: 2px solid orange;
-  border-radius: 1em;
+  border-radius: 2em;
   padding: 0.25em;
   cursor: help;
 }/*# sourceMappingURL=board.css.map */

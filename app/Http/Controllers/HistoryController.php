@@ -99,6 +99,12 @@ class HistoryController extends Controller
 	}
 	public function getPersonalsBest(Request $request)
 	{
+		$user = $request->user();
+		if($user === null) return [
+			'code'=>'1',
+			'data'=>'No user found',
+		];
+
 		$pb = $request->user()->history()
 			->select(["win_second",])
 			->where([

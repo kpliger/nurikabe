@@ -6,6 +6,7 @@ import { type SharedData, type User } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { ChevronsUpDown } from 'lucide-vue-next';
 import UserMenuContent from './UserMenuContent.vue';
+import { router } from '@inertiajs/vue3';
 
 const page = usePage<SharedData>();
 const user = page.props.auth.user as User;
@@ -34,4 +35,14 @@ const { isMobile, state } = useSidebar();
             </DropdownMenu>
         </SidebarMenuItem>
     </SidebarMenu>
+
+    <SidebarMenuButton  v-else size="lg" class="data-[state=open]:bg-sidebar-accent
+                data-[state=open]:text-sidebar-accent-foreground
+                cursor-pointer
+                bg-muted
+            "
+        @click="router.visit(route('login'))"
+    >
+        Log in
+    </SidebarMenuButton>
 </template>
